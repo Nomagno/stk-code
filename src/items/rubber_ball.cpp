@@ -26,8 +26,10 @@
 #include "items/attachment.hpp"
 #include "items/projectile_manager.hpp"
 #include "karts/kart.hpp"
+#include "karts/controller/controller.hpp"
 #include "karts/kart_properties.hpp"
 #include "modes/linear_world.hpp"
+#include "network/network_config.hpp"
 #include "network/network_string.hpp"
 #include "network/rewind_info.hpp"
 #include "network/rewind_manager.hpp"
@@ -38,6 +40,8 @@
 #include "tracks/drive_node.hpp"
 #include "tracks/track.hpp"
 #include "utils/stk_process.hpp"
+#include "utils/string_utils.hpp"
+#include "utils/translation.hpp"
 
 #include "utils/log.hpp" //TODO: remove after debugging is done
 
@@ -371,6 +375,37 @@ void RubberBall::init(const XMLNode &node, scene::IMesh *rubberball)
 
     Flyable::init(node, rubberball, PowerupManager::POWERUP_RUBBERBALL);
 }   // init
+
+// ----------------------------------------------------------------------------
+/** Picks a random message to be displayed when a kart is hit by the
+ *  rubber ball.
+ *  \param The kart that was hit (ignored here).
+ *  \returns The string to display.
+ */
+const core::stringw RubberBall::getHitString(const Kart *kart_victim,
+                                             const Kart *kart_attacker) const
+{
+    // disable hit message for network
+    if(!(NetworkConfig::get()->isNetworking() && NetworkConfig::get()->isClient()))
+    {
+        const int COUNT = 2;
+        RandomGenerator r;
+        switch (r.get(COUNT))
+        {
+            //I18N: shown when a player is hit by a rubber ball. %1 is the
+            // attacker, %0 is the victim.
+            case 0: return _("%s is being bounced around.", kart_victim->getController()->getName());
+            //I18N: shown when a player is hit by a rubber ball. %1 is the
+            // attacker, %0 is the victim.
+            case 1: return _("Fetch the ball, %s!", kart_victim->getController()->getName());
+            default:assert(false); return L"";   // avoid compiler warning
+        }
+    }
+    else
+    {
+        return L"";
+    }
+}   // getHitString
 
 // ----------------------------------------------------------------------------
 /** Updates the rubber ball.

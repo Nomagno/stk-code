@@ -384,6 +384,15 @@ int MaxSpeed::getSpeedIncreaseTicksLeft(unsigned int category)
 }   // getSpeedIncreaseTimeLeft
 
 // ----------------------------------------------------------------------------
+/** Returns how much decreased speed time is left over in the given category.
+ *  \param category Which category to report on.
+ */
+int MaxSpeed::getSpeedDecreaseTicksLeft(unsigned int category)
+{
+    return m_speed_decrease[category].getTimeLeft();
+}   // getSpeedDecreaseTimeLeft
+
+// ----------------------------------------------------------------------------
 /** Returns if increased speed is active in the given category.
  *  \param category Which category to report on.
  */

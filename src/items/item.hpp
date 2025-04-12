@@ -57,7 +57,7 @@ public:
     /**
     * The list of all items. Important for the switch item function:
     * bubblegum must be the last item (since bubble gum can't be
-    * switched with any other item, since it's a different objecct).
+    * switched with any other item, since it's a different object).
     */
     enum ItemType
     {
@@ -98,7 +98,7 @@ private:
     int  m_item_id;
 
     /** Optionally if item was placed by a kart, a timer can be used to
-    *  temporarly deactivate collision so a kart is not hit by its own item */
+    *  temporarily deactivate collision so a kart is not hit by its own item */
     int m_deactive_ticks;
 
     /** Counts how often an item is used before it disappears. Used for

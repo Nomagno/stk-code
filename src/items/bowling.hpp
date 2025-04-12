@@ -57,6 +57,8 @@ public:
     virtual bool updateAndDelete(int ticks) OVERRIDE;
     virtual bool hit(Kart* kart, PhysicalObject* obj=NULL) OVERRIDE;
     virtual HitEffect *getHitEffect() const OVERRIDE;
+    virtual const core::stringw getHitString(const Kart *kart_victim,
+                                             const Kart *kart_attacker) const;
     // ------------------------------------------------------------------------
     virtual void onFireFlyable() OVERRIDE;
 

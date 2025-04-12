@@ -232,7 +232,7 @@ void ItemState::saveCompleteState(BareNetworkString* buffer) const
  *  \param owner 'Owner' of this item, i.e. the kart that drops it. This is
  *         used to deactivate this item for the owner, i.e. avoid that a kart
  *         'collects' its own bubble gum. NULL means no owner, and the item
- *         can be collected immediatley by any kart.
+ *         can be collected immediately by any kart.
  */
 Item::Item(ItemType type, const Vec3& xyz, const Vec3& normal,
            scene::IMesh* mesh, scene::IMesh* lowres_mesh,
@@ -456,7 +456,7 @@ void Item::handleNewMesh(ItemType type)
     if (m_icon_node)
         m_appear_anime_node->removeChild(m_icon_node);
     m_icon_node = NULL;
-    auto icon = ItemManager::getIcon(type);
+    auto icon = ItemManager::getIcon_name(type);
 
     if (!icon.empty())
     {

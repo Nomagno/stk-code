@@ -23,9 +23,12 @@
 
 #include "io/xml_node.hpp"
 #include "karts/kart.hpp"
+#include "karts/controller/controller.hpp"
 #include "utils/constants.hpp"
 #include "utils/hit_processor.hpp"
 #include "utils/random_generator.hpp"
+#include "utils/string_utils.hpp"
+#include "utils/translation.hpp"
 
 #include "utils/log.hpp" //TODO: remove after debugging is done
 #include <ISceneNode.h>
@@ -52,6 +55,30 @@ void Cake::init(const XMLNode &node, scene::IMesh *cake_model)
     node.get("max-distance",    &max_distance  );
     m_st_max_distance_squared = max_distance*max_distance;
 }   // init
+
+// ----------------------------------------------------------------------------
+/** Picks a random message to be displayed when a kart is hit by a cake.
+ *  \param The kart that was hit (ignored here).
+ *  \returns The string to display.
+ */
+const core::stringw Cake::getHitString(const Kart *kart_victim,
+                                       const Kart *kart_attacker) const
+{
+    const int CAKE_STRINGS_AMOUNT = 4;
+    RandomGenerator r;
+    switch (r.get(CAKE_STRINGS_AMOUNT))
+    {
+        //I18N: shown when hit by cake. %1 is the attacker, %0 is the victim.
+        case 0: return _("%s eats too much of %s's cake.", kart_victim->getController()->getName(), kart_attacker->getController()->getName());
+        //I18N: shown when hit by cake. %1 is the attacker, %0 is the victim.
+        case 1: return _("%s is dubious of %s's cooking skills.", kart_victim->getController()->getName(), kart_attacker->getController()->getName());
+        //I18N: shown when hit by cake. %1 is the attacker, %0 is the victim.
+        case 2: return _("%s should not play with %s's lunch.", kart_victim->getController()->getName(), kart_attacker->getController()->getName());
+        //I18N: shown when hit by cake. %1 is the attacker, %0 is the victim.
+        case 3: return _("%s ruins %s's cakeless diet.", kart_attacker->getController()->getName(), kart_victim->getController()->getName());
+        default: assert(false); return L"";   // avoid compiler warning
+    }
+}   // getHitString
 
 // ----------------------------------------------------------------------------
 /** Callback from the physics in case that a kart or physical object is hit.

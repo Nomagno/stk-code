@@ -705,7 +705,7 @@ void LinearWorld::getKartsDisplayInfo(
             }
             rank_info.m_text = irr::core::stringw(str.c_str());
         }
-        else if (kart->hasFinishedRace())
+        else
         {
             rank_info.m_text = kart->getController()->getName();
             if (RaceManager::get()->getKartGlobalPlayerId(i) > -1)
@@ -718,10 +718,18 @@ void LinearWorld::getKartsDisplayInfo(
                     rank_info.m_text += flag;
                 }
             }
-        }
-        else
-        {
-            rank_info.m_text = "";
+            // at the end of the race, show medal emoji for first three
+            if (kart->hasFinishedRace())
+            {
+                const int position = kart->getPosition();
+                if (position<=3)
+                {
+                    // ranking first: 0x1f947, second: 0x1f948, third: 0x1f949
+                    const core::stringw& emoji = StringUtils::utf32ToWide({0x1f946 + (uint32_t)position});
+                    rank_info.m_text += L" ";
+                    rank_info.m_text += emoji;
+                }
+            }
         }
 
         int numLaps = RaceManager::get()->getNumLaps();

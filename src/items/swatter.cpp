@@ -40,9 +40,12 @@
 #include "karts/explosion_animation.hpp"
 #include "karts/kart_properties.hpp"
 #include "modes/capture_the_flag.hpp"
+#include "network/network_config.hpp"
 #include "network/network_string.hpp"
 #include "network/rewind_manager.hpp"
 #include "utils/hit_processor.hpp"
+#include "utils/string_utils.hpp"
+#include "utils/translation.hpp"
 #include <IAnimatedMeshSceneNode.h>
 
 #define SWAT_POS_OFFSET        core::vector3df(0.0, 0.2f, -0.4f)
@@ -421,6 +424,16 @@ void Swatter::squashThingsAround()
     }
     if (success)
     {
+#ifndef SERVER_ONLY
+        // disable hit message for network
+        if(!(NetworkConfig::get()->isNetworking() && NetworkConfig::get()->isClient()))
+        {
+            RaceGUIBase* gui = World::getWorld()->getRaceGUI();
+            gui->addMessage(getHitString(m_closest_kart, m_kart),
+                            NULL, 3.0f, video::SColor(255, 255, 255, 255), false, false, true);
+        }
+#endif
+
         World::getWorld()->kartHit(m_closest_kart->getWorldKartId(),
             m_kart->getWorldKartId());
 
@@ -457,6 +470,37 @@ void Swatter::squashThingsAround()
 
     // TODO: squash items
 }   // squashThingsAround
+
+// ----------------------------------------------------------------------------
+/** Picks a random message to be displayed when a kart is hit by a swatter
+ *  \param kart The kart that was hit.
+ *  \returns The string to display.
+ */
+const core::stringw Swatter::getHitString(const Kart *kart_victim,
+                                          const Kart *kart_attacker) const
+{
+    // disable hit message for network
+    if(!(NetworkConfig::get()->isNetworking() && NetworkConfig::get()->isClient()))
+    {
+        const int SWATTER_STRINGS_AMOUNT = 3;
+        RandomGenerator r;
+        switch (r.get(SWATTER_STRINGS_AMOUNT))
+        {
+            //I18N: shown when hit by swatter. %1 is the attacker, %0 is the victim.
+            case 0 : return _("%s thinks %s is a big fly.", kart_attacker->getController()->getName(), kart_victim->getController()->getName());
+            //I18N: shown when hit by swatter. %1 is the attacker, %0 is the victim.
+            case 1 : return _("%s flattens %s.", kart_attacker->getController()->getName(), kart_victim->getController()->getName());
+            //I18N: shown when hit by swatter. %s is the victim
+            case 2 : return _("%s feels flat today.", kart_victim->getController()->getName());
+            default: assert(false); return L"";  //  avoid compiler warning
+        }
+    }
+    else
+    {
+        return L"";
+    }
+    
+}
 
 // ----------------------------------------------------------------------------
 void Swatter::restoreState(BareNetworkString* buffer)

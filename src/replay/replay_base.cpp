@@ -23,7 +23,7 @@
 // -----------------------------------------------------------------------------
 ReplayBase::ReplayBase()
 {
-}   // ReplayBaese
+}   // ReplayBase
 // -----------------------------------------------------------------------------
 /** Opens a replay file which is determined by sub classes.
  *  \param writeable True if the file should be opened for writing.

@@ -54,6 +54,8 @@ public:
                  Cake (Kart *kart);
     static  void init     (const XMLNode &node, scene::IMesh *cake_model);
     virtual bool hit(Kart* kart, PhysicalObject* obj=NULL) OVERRIDE;
+    virtual const core::stringw getHitString(const Kart *kart_victim,
+                                             const Kart *kart_attacker) const;
     // ------------------------------------------------------------------------
     virtual void hitTrack () OVERRIDE
     {

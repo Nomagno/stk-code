@@ -776,6 +776,13 @@ std::string FileManager::getAssetChecked(FileManager::AssetType type,
                                          bool abort_on_error) const
 {
     std::string path = m_subdir_name[type]+name;
+    // deal with the case of theme
+    if (GUIEngine::getSkin()->hasIconTheme())
+    {
+        if (type == GUI_SCREEN || type == GUI_DIALOG)
+            path = getAsset(type,name);
+    }
+
     if(fileExists(path))
         return path;
 
@@ -801,6 +808,22 @@ std::string FileManager::getAsset(FileManager::AssetType type,
     if (type == GUI_ICON && GUIEngine::getSkin()->hasIconTheme())
     {
         return GUIEngine::getSkin()->getThemedIcon("gui/icons/" + name);
+    }
+    else if (type == GUI_SCREEN && GUIEngine::getSkin()->hasIconTheme())
+    {
+        std::string path = GUIEngine::getSkin()->getDataPath() + "data/gui/screens/" + name;
+        if (fileExists(path))
+            return path;
+        else
+            return m_subdir_name[type] + name;
+    }
+    else if (type == GUI_DIALOG && GUIEngine::getSkin()->hasIconTheme())
+    {
+        std::string path = GUIEngine::getSkin()->getDataPath() + "data/gui/screens/" + name;
+        if (fileExists(path))
+            return path;
+        else
+            return m_subdir_name[type] + name;
     }
     return m_subdir_name[type] + name;
 }   // getAsset

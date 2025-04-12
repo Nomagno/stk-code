@@ -54,8 +54,9 @@ public:
     static  void init(const XMLNode &node, scene::IMesh* missile);
     virtual bool updateAndDelete(int ticks) OVERRIDE;
     virtual void hitTrack () OVERRIDE;
-    virtual bool hit      (Kart *kart, PhysicalObject *obj=NULL)
-        OVERRIDE;
+    virtual bool hit      (Kart *kart, PhysicalObject *obj=NULL);
+    virtual const core::stringw getHitString(const Kart *kart_victim,
+                                             const Kart *kart_attacker) const;
     // ------------------------------------------------------------------------
     void         updateGraphics(float dt) OVERRIDE;
     // ------------------------------------------------------------------------

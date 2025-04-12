@@ -24,6 +24,7 @@
 #include "graphics/material.hpp"
 #include "graphics/material_manager.hpp"
 #include "graphics/sp/sp_base.hpp"
+#include "graphics/material_manager.hpp"
 #include "io/file_manager.hpp"
 #include "karts/kart.hpp"
 #include "karts/controller/spare_tire_ai.hpp"
@@ -208,6 +209,24 @@ ItemManager::ItemManager()
     else
     {
         m_items_in_quads = NULL;
+    }
+
+    // load item icons
+    std::string item_icon_file_names[ItemState::ITEM_COUNT]; // save the names of icon files
+    item_icon_file_names[ItemState::ITEM_BONUS_BOX      ] = "gift.png";
+    item_icon_file_names[ItemState::ITEM_BANANA         ] = "banana_minimap.png"; // some bug using banana.png
+    item_icon_file_names[ItemState::ITEM_NITRO_BIG      ] = "nitro_big.png";
+    item_icon_file_names[ItemState::ITEM_NITRO_SMALL    ] = "nitro.png";
+    item_icon_file_names[ItemState::ITEM_BUBBLEGUM      ] = "bubblegum-icon.png";
+    item_icon_file_names[ItemState::ITEM_BUBBLEGUM_NOLOK] = "bubblegum-icon.png";
+    item_icon_file_names[ItemState::ITEM_EASTER_EGG     ] = "easter_minimap.png";
+
+    std::string icon_file("");
+    // loop all items to load the icons
+    for(unsigned int i=ItemState::ITEM_FIRST; i<ItemState::ITEM_COUNT; i++)
+    {
+        icon_file = GUIEngine::getSkin()->getThemedIcon("gui/icons/" + item_icon_file_names[i]);
+        m_all_icons[i] = material_manager->getMaterial(icon_file,true,true);
     }
 }   // ItemManager
 

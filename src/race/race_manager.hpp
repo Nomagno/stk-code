@@ -132,7 +132,7 @@ public:
     };
 
     // ----------------------------------------------------------------------------------------
-    /** True if the AI should have additional abbilities, e.g.
+    /** True if the AI should have additional abilities, e.g.
      *  nolok will get special bubble gums in the final challenge. */
     enum AISuperPower
     {
@@ -764,7 +764,7 @@ public:
     bool isLinearRaceMode() const
     {
         const int id = (int)m_minor_mode;
-        // info is stored in its ID for conveniance, see the macros LINEAR_RACE
+        // info is stored in its ID for convenience, see the macros LINEAR_RACE
         // and BATTLE_ARENA above for exact meaning.
         if(id > 999 && id < 2000) return true;
         else return false;
@@ -776,7 +776,7 @@ public:
     bool isLinearRaceMode(const MinorRaceModeType mode) const
     {
         const int id = (int)mode;
-        // info is stored in its ID for conveniance, see the macros LINEAR_RACE
+        // info is stored in its ID for convenience, see the macros LINEAR_RACE
         // and BATTLE_ARENA above for exact meaning.
         if(id > 999 && id < 2000) return true;
         else return false;

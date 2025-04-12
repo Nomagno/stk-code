@@ -6466,3 +6466,172 @@ msgstr "如果您注重稳定性，请考虑使用此稳定版本：%s"
 #: supertuxkart.appdata.xml:44
 msgid "SuperTuxKart Team"
 msgstr "SuperTuxKart开发团队"
+
+#. I18N: shown when hit by bowling ball. %1 is the attacker, %0 is
+#. the victim.
+#: src/items/bowling.cpp:92
+#, c-format
+msgid "%s will not go bowling with %s again."
+msgstr "%s 再也不会和 %s 玩保龄球了"
+
+#. I18N: shown when hit by bowling ball. %1 is the attacker, %0 is
+#. the victim.
+#: src/items/bowling.cpp:95
+#, c-format
+msgid "%s strikes %s!"
+msgstr "%s 打中了 %s"
+
+#. I18N: shown when hit by bowling ball. %1 is the attacker, %0 is
+#. the victim.
+#: src/items/bowling.cpp:98
+#, c-format
+msgid "%s is bowled over by %s."
+msgstr "%s 被 %s 的保龄球砸了"
+
+#. I18N: shown when hit by own bowling ball. %s is the kart.
+#: src/items/bowling.cpp:108
+#, c-format
+msgid "%s is practicing with a blue, big, spheric yo-yo."
+msgstr "%s 在练习一个蓝色的巨大的悠悠球"
+
+#. I18N: shown when hit by own bowling ball. %s is the kart.
+#: src/items/bowling.cpp:110
+#, c-format
+msgid "%s is the world master of the boomerang ball."
+msgstr "%s 是回旋镖大师"
+
+#. I18N: shown when hit by own bowling ball. %s is the kart.
+#: src/items/bowling.cpp:112
+#, c-format
+msgid "%s should play (rubber) darts instead of bowling."
+msgstr "%s 应该去玩橡胶飞镖，而不是保龄球"
+
+#. I18N: shown when hit by cake. %1 is the attacker, %0 is the victim.
+#: src/items/cake.cpp:72
+#, c-format
+msgid "%s eats too much of %s's cake."
+msgstr "%s 吃了好多 %s 的蛋糕"
+
+#. I18N: shown when hit by cake. %1 is the attacker, %0 is the victim.
+#: src/items/cake.cpp:74
+#, c-format
+msgid "%s is dubious of %s's cooking skills."
+msgstr "%s 对 %s 的烹饪技术表示怀疑"
+
+#. I18N: shown when hit by cake. %1 is the attacker, %0 is the victim.
+#: src/items/cake.cpp:76
+#, c-format
+msgid "%s should not play with %s's lunch."
+msgstr "%s 不应该拿 %s 的午餐来玩"
+
+#. I18N: shown when hit by cake. %1 is the attacker, %0 is the victim.
+#: src/items/cake.cpp:78
+#, c-format
+msgid "%s ruins %s's cakeless diet."
+msgstr "%s 破坏了 %s 没有蛋糕的饮食"
+
+#. I18N: shown when a player receives a plunger in his face
+#: src/items/plunger.cpp:155
+#, c-format
+msgid "%s gets a fancy mask from %s."
+msgstr "%s 被 %s 的马桶揣子揣到了脸上"
+
+#. I18N: shown when a player receives a plunger in his face
+#: src/items/plunger.cpp:157
+#, c-format
+msgid "%s merges %s's face with a plunger."
+msgstr "%s 直接把马桶揣子揣到了 %s 的脸上"
+
+#. I18N: shown when anchor applied. %s is the victim.
+#: src/items/powerup.cpp:52
+#, c-format
+msgid "Arrr, %s dropped anchor, Captain!"
+msgstr "哇呀呀呀，%s 吃到了一个锚！"
+
+#: src/items/powerup.cpp:53
+#, c-format
+msgid "%s pays the next round of grog!"
+msgstr "%s 被锚了，因为要付下一次的酒钱！"
+
+#: src/items/powerup.cpp:54
+#, c-format
+msgid "%s is a mighty pirate!"
+msgstr "%s 是一个强大的海盗，锚住他！"
+
+#: src/items/powerup.cpp:69
+msgid "Geronimo!!!"
+msgstr "有人使用降落伞！"
+
+#: src/items/powerup.cpp:70
+msgid "The Space Shuttle has landed!"
+msgstr "航天飞机降落啦，正在减速！"
+
+#: src/items/powerup.cpp:71
+msgid "Do you want to fly kites?"
+msgstr "放个风筝怎么样?"
+
+#: src/items/powerup.cpp:86
+msgid "Magic, son. Nothing else in the world smells like that."
+msgstr "注意,所有道具和香蕉临时颠倒过来了!!!"
+
+#: src/items/powerup.cpp:87
+msgid "A wizard did it!"
+msgstr "一个巫师干的--所有道具和香蕉暂时颠倒!"
+
+#: src/items/powerup.cpp:88
+msgid "Banana? Box? Banana? Box? Banana? Box?"
+msgstr "香蕉皮？宝箱？香蕉皮？宝箱？…@#^$…香蕉皮？宝箱？"
+
+#. I18N: shown when a player is hit by a rubber ball. %1 is the
+#. attacker, %0 is the victim.
+#: src/items/rubber_ball.cpp:382
+#, c-format
+msgid "%s is being bounced around."
+msgstr "%s被弹开了。"
+
+#. I18N: shown when a player is hit by a rubber ball. %1 is the
+#. attacker, %0 is the victim.
+#: src/items/rubber_ball.cpp:385
+#, c-format
+msgid "Fetch the ball, %s!"
+msgstr "%s 接到了一个球！"
+
+#. I18N: shown when hit by plunger. %0 is the victim, %1 is the attacker
+#: src/items/rubber_band.cpp:50
+#, c-format
+msgid "%s bites %s's bait."
+msgstr "%s 被 %s 的马桶揣子揣上了"
+
+#. I18N: shown when hit by plunger. %0 is the victim, %1 is the attacker
+#: src/items/rubber_band.cpp:52
+#, c-format
+msgid "%s latches onto %s for a free ride."
+msgstr "%s 揣上了 %s，哈哈，搭了顺风车"
+
+#. I18N: shown when hit by plunger. %0 is the victim, %1 is the attacker
+#: src/items/rubber_band.cpp:54
+#, c-format
+msgid "%s tests a tractor beam on %s."
+msgstr "%s 在 %s 上面测试了牵引光线！"
+
+#. I18N: shown when hit by swatter. %1 is the attacker, %0 is the victim.
+#: src/items/swatter.cpp:470
+#, c-format
+msgid "%s thinks %s is a big fly."
+msgstr "%s 认为 %s 是一个大苍蝇"
+
+#. I18N: shown when hit by swatter. %1 is the attacker, %0 is the victim.
+#: src/items/swatter.cpp:472
+#, c-format
+msgid "%s flattens %s."
+msgstr "%s 拍扁了 %s"
+
+#. I18N: shown when hit by swatter. %s is the victim
+#: src/items/swatter.cpp:474
+#, c-format
+msgid "%s feels flat today."
+msgstr "%s 今天感到很扁"
+
+#: src/states_screens/credits.cpp:209
+msgid "translator-credits"
+msgstr "Launchpad Contributions:\nBen Au, 2015\nBenau, 2016,2019-2020\nBenau, 2015-2016\nCodingJellyfish, 2021\nJin Zhang, 2015,2019-2021\nJz Pan, 2017\nCodingJellyfish, 2018-2019\nCodingJellyfish, 2018\nDawid Gan\nSTK-team\nSizhuang Liu\nXhacker Liu\nacme_pjz\njin\nlks\nluojie-dune\nsohey\ndumaosen"

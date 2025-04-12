@@ -42,6 +42,9 @@ using namespace irr;
 #include "guiengine/scalable_font.hpp"
 #include "io/file_manager.hpp"
 #include "items/powerup_manager.hpp"
+#include "items/powerup.hpp"
+#include "items/attachment_manager.hpp"
+#include "items/item_manager.hpp"
 #include "items/projectile_manager.hpp"
 #include "karts/kart.hpp"
 #include "karts/tyres.hpp"
@@ -49,6 +52,7 @@ using namespace irr;
 #include "karts/controller/spare_tire_ai.hpp"
 #include "karts/kart_properties.hpp"
 #include "karts/kart_properties_manager.hpp"
+#include "karts/max_speed.hpp"
 #include "modes/capture_the_flag.hpp"
 #include "modes/follow_the_leader.hpp"
 #include "modes/linear_world.hpp"
@@ -57,11 +61,15 @@ using namespace irr;
 #include "network/protocols/client_lobby.hpp"
 #include "race/race_manager.hpp"
 #include "states_screens/race_gui_multitouch.hpp"
+#include "tracks/check_line.hpp"
+#include "tracks/check_manager.hpp"
+#include "tracks/check_structure.hpp"
 #include "tracks/track.hpp"
 #include "tracks/track_object_manager.hpp"
 #include "utils/constants.hpp"
 #include "utils/string_utils.hpp"
 #include "utils/translation.hpp"
+#include "karts/skidding.hpp"
 
 #include <algorithm>
 
@@ -106,6 +114,7 @@ RaceGUI::RaceGUI()
     m_soccer_ball = irr_driver->getTexture(FileManager::GUI_ICON, "soccer_ball_normal.png");
     m_heart_icon = irr_driver->getTexture(FileManager::GUI_ICON, "heart.png");
     m_basket_ball_icon = irr_driver->getTexture(FileManager::GUI_ICON, "rubber_ball-icon.png");
+    m_checkline_icon = irr_driver->getTexture(FileManager::GUI_ICON, "checkline.png");
     m_champion = irr_driver->getTexture(FileManager::GUI_ICON, "cup_gold.png");
 }   // RaceGUI
 
@@ -403,6 +412,16 @@ void RaceGUI::renderPlayerView(const Camera *camera, float dt)
 
     if (!m_is_tutorial)
         drawLap(kart, viewport, scaling);
+
+    // draw heading line
+    drawHeadingLine(kart,20);
+
+    // draw ball line
+    if (RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_SOCCER)
+    {
+        drawBallLine(10);
+    }
+
     FontDrawer::endBatching();
 #endif
 }   // renderPlayerView
@@ -844,6 +863,40 @@ void RaceGUI::drawGlobalMiniMap()
     }
 
     Kart* target_kart = NULL;
+    // show items and nitros on minimap
+    if (UserConfigParams::m_karts_powerup_gui)
+    {
+        ItemManager* itm = track->getItemManager();
+        // const Powerup* powerup = kart->getPowerup();
+        int marker_half_size = m_minimap_ai_size>>1;
+        for (unsigned i = 0; i < itm->getNumberOfItems(); i++)
+        {
+            ItemState* it = itm->getItem(i);
+            if (it != NULL) //&& it->getType() != Item::ITEM_EASTER_EGG // hide easter egg
+            {
+                if (it->isAvailable()) // only show collectable items
+                {
+                    video::ITexture *icon_item = itm->getIcon(it->getType())->getTexture();
+                    // video::ITexture *icon_item = powerup->getIcon(it->getType())->getTexture();
+                    // assert(icon_item);
+                    if (icon_item != NULL)
+                    {
+                        const Vec3& xyz = it->getXYZ().toIrrVector();
+                        Vec3 draw_at;
+                        track->mapPoint2MiniMap(xyz, &draw_at);
+                        // make item icon half the player icon size, otherwise too busy
+                        core::rect<s32> pos_tmp(m_map_left+(int)(draw_at.getX()-marker_half_size/2), // left
+                                                lower_y   -(int)(draw_at.getY()+marker_half_size/2), // upper
+                                                m_map_left+(int)(draw_at.getX()+marker_half_size/2), // right
+                                                lower_y   -(int)(draw_at.getY()-marker_half_size/2));// lower
+                        core::rect<s32> source(core::position2di(0, 0), icon_item->getSize());
+                        draw2DImage(icon_item, pos_tmp, source, NULL, NULL, true);
+                    }
+                }
+            }
+        }
+    }
+
     Camera* cam = Camera::getActiveCamera();
     auto cl = LobbyProtocol::get<ClientLobby>();
     bool is_nw_spectate = cl && cl->isSpectator();
@@ -916,7 +969,7 @@ void RaceGUI::drawGlobalMiniMap()
                     color = video::SColor(255, 0, 0, 200);
                 }
             }
-                                  
+
             video::SColor colors[4] = {color, color, color, color};
 
             const core::rect<s32> rect(core::position2d<s32>(0,0),
@@ -943,9 +996,120 @@ void RaceGUI::drawGlobalMiniMap()
             }
         }   // if isPlayerController
 
-        draw2DImage(icon, position, source, NULL, NULL, true);
+        // icon squash with kart squash
+        if (UserConfigParams::m_karts_powerup_gui &&
+            !kart->getKartAnimation() && kart->isSquashed() )
+        {
+            core::rect<s32> pos_tmp(m_map_left+(int)(draw_at.getX()-marker_half_size),   // left
+                                    lower_y   -(int)(draw_at.getY()+marker_half_size/2), // upper
+                                    m_map_left+(int)(draw_at.getX()+marker_half_size),   // right
+                                    lower_y   -(int)(draw_at.getY()-marker_half_size/2));// lower
+            draw2DImage(icon, pos_tmp, source, NULL, NULL, true);
+        }
+        else
+        {
+            draw2DImage(icon, position, source, NULL, NULL, true);
+        }
 
+        // show player's powerups in minimap
+        const Powerup* powerup = kart->getPowerup();
+        if (UserConfigParams::m_karts_powerup_gui &&
+            powerup->getType() != PowerupManager::POWERUP_NOTHING && !kart->hasFinishedRace())
+        {
+            video::ITexture *iconItem = powerup->getIcon()->getTexture();
+            assert(iconItem);
+            const core::rect<s32> posItem(m_map_left+(int)(draw_at.getX()), // left
+                                          lower_y   -(int)(draw_at.getY()), // upper
+                                          m_map_left+(int)(draw_at.getX()+marker_half_size*3/2),  // right
+                                          lower_y   -(int)(draw_at.getY()-marker_half_size*3/2)); // lower
+            const core::rect<s32> rect(core::position2d<s32>(0,0), iconItem->getSize());
+            draw2DImage(iconItem, posItem, rect, NULL, NULL, true);
+
+            int numberItems = kart->getPowerup()->getNum();
+            if (numberItems > 1)
+            {
+                gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
+                const core::rect<s32> posNumber(m_map_left+(int)(draw_at.getX()+marker_half_size),     // left
+                                                lower_y   -(int)(draw_at.getY()-marker_half_size/2),   // upper
+                                                m_map_left+(int)(draw_at.getX()+marker_half_size*5/2), // right
+                                                lower_y   -(int)(draw_at.getY()-marker_half_size*4/2));// lower
+                font->setScale(3.f*((float) marker_half_size)/(2.f*(float)font->getDimension(L"X").Height));
+                font->draw(StringUtils::toWString(numberItems), posNumber, video::SColor(255, 255, 255, 255));
+            }
+        }
+        // show player's attachment
+        if (UserConfigParams::m_karts_powerup_gui &&
+            kart->getAttachment()->getType() != Attachment::ATTACH_NOTHING)
+        {
+            video::ITexture *icon_attachment =
+            attachment_manager->getIcon(kart->getAttachment()->getType())
+            ->getTexture();
+            if (icon_attachment != NULL)
+            {
+                const core::rect<s32> posAttach(m_map_left+(int)(draw_at.getX()-marker_half_size*3/2), // left
+                                                lower_y   -(int)(draw_at.getY()+marker_half_size*3/2), // upper
+                                                m_map_left+(int)(draw_at.getX()),  // right
+                                                lower_y   -(int)(draw_at.getY())); // lower
+                const core::rect<s32> rect(core::position2d<s32>(0,0), icon_attachment->getSize());
+                draw2DImage(icon_attachment, posAttach, rect, NULL, NULL, true);
+            }
+        }
+        // show player's name initials
+        if (UserConfigParams::m_karts_powerup_gui &&
+            !kart->getName().empty())
+        {
+            gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
+            const core::rect<s32> posNumber(m_map_left+(int)(draw_at.getX()+marker_half_size/4.0),  // left
+                                            lower_y   -(int)(draw_at.getY()+marker_half_size*3.0/2),// upper
+                                            m_map_left+(int)(draw_at.getX()+marker_half_size*3.0/2),// right
+                                            lower_y   -(int)(draw_at.getY()+marker_half_size/4.0)); // lower
+            font->setScale(5.0f*(float) marker_half_size/(4.0f*(float)font->getDimension(L"X").Height));
+            font->draw(kart->getController()->getName().subString(0,1), posNumber, video::SColor(255, 255, 255, 255));
+        }
+
+        // show the nitro meter
+        if ((has_teams || is_local) && m_gauge_full_icon != NULL)
+        {
+            drawEnergyMeterIcon(position.UpperLeftCorner.X, position.LowerRightCorner.Y,
+                                2*marker_half_size, kart);
+        }
     }   // for i<getNumKarts
+
+    // Draw checklines on the minimap
+    if (RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_NORMAL_RACE ||
+        RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_TIME_TRIAL ||
+        RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_FOLLOW_LEADER)
+    {
+        video::SColor color = video::SColor(255, 200, 0, 0);
+        // Loop all checklines
+        core::rect<s32> rect(core::position2di(0, 0), m_checkline_icon->getSize());
+        CheckManager* cm = Track::getCurrentTrack()->getCheckManager();
+        for (unsigned i = 0; i < cm->getCheckStructureCount(); i++)
+        {
+            CheckStructure* cs = cm->getCheckStructure(i);
+            if(cs->getType() == CheckStructure::CT_ACTIVATE)
+            {
+                CheckLine* cl = dynamic_cast<CheckLine*>(cs);
+
+                // get the two points that define the checkline and map to minimap
+                Vec3 p1, p2;
+                track->mapPoint2MiniMap(cl->getLeftPoint() , &p1);
+                track->mapPoint2MiniMap(cl->getRightPoint(), &p2);
+
+                // draw the checkline
+                const Vec3 direction = p2-p1;
+                const Vec3 draw_at = 0.5f*(p1+p2);
+                const float rotation = atan2f(direction.getY(),direction.getX());
+                const s32 half_line_size = (s32)(0.5f*direction.length());
+                core::rect<s32> position(m_map_left+(int)(draw_at.getX()-half_line_size),
+                                         lower_y   -(int)(draw_at.getY()+half_line_size),
+                                         m_map_left+(int)(draw_at.getX()+half_line_size),
+                                         lower_y   -(int)(draw_at.getY()-half_line_size));
+
+                draw2DImageRotationColor(m_checkline_icon, position, rect, NULL, -1.0f*rotation, color);
+            }
+        }
+    }
 
     // Draw the basket-ball icons on the minimap
     std::vector<Vec3> basketballs = ProjectileManager::get()->getBasketballPositions();
@@ -957,7 +1121,7 @@ void RaceGUI::drawGlobalMiniMap()
         video::ITexture* icon = m_basket_ball_icon;
 
         core::rect<s32> source(core::position2di(0, 0), icon->getSize());
-        int marker_half_size = m_minimap_player_size / 2;
+        int marker_half_size = m_minimap_player_size / 4;
         core::rect<s32> position(m_map_left+(int)(draw_at.getX()-marker_half_size),
                                  lower_y   -(int)(draw_at.getY()+marker_half_size),
                                  m_map_left+(int)(draw_at.getX()+marker_half_size),
@@ -1187,6 +1351,91 @@ void RaceGUI::drawEnergyMeter(int x, int y, const Kart *kart,
 }   // drawEnergyMeter
 
 //-----------------------------------------------------------------------------
+/** Energy meter that gets filled with nitro. Plot around kart icons.
+ *  \param x X position of the meter on minimap.
+ *  \param y Y position of the meter on minimap.
+ *  \param icon_size size of the icon to be drawn on minimap.
+ *  \param kart Kart to display the data for.
+ */
+void RaceGUI::drawEnergyMeterIcon(int x, int y, int icon_size,
+                                  const Kart *kart)
+{
+#ifndef SERVER_ONLY
+
+    // get the amount of nitro, in terms of fraction: 0-empty, 1-full
+    float state = (float)(kart->getEnergy()) / kart->getKartProperties()->getNitroMax();
+    if (state < 0.0f) state = 0.0f;
+    else if (state > 1.0f) state = 1.0f;
+
+    core::vector2df offset;
+    offset.X = (float)x;
+    offset.Y = (float)y;
+
+    // The positions for A to G are defined here.
+    const int vertices_count = 7;
+
+    core::vector2df position[vertices_count];
+    position[0].X = 0.5f;//A
+    position[0].Y = 0.5f;//A
+    position[1].X = 0.5f;//B
+    position[1].Y = 0.0f;//B
+    position[2].X = 1.0f;//C
+    position[2].Y = 0.0f;//C
+    position[3].X = 1.0f;//D
+    position[3].Y = 1.0f;//D
+    position[4].X = 0.0f;//E
+    position[4].Y = 1.0f;//E
+    position[5].X = 0.0f;//F
+    position[5].Y = 0.0f;//F
+    position[6].X = 0.4999f;//G (same as point B)
+    position[6].Y = 0.0f;//G
+
+    // The states at which different polygons must be used.
+    float threshold[vertices_count-2];
+    threshold[0] = 0.125f; //for gauge drawing
+    threshold[1] = 0.375f;
+    threshold[2] = 0.625f;
+    threshold[3] = 0.875f;
+    threshold[4] = 1.0f;
+
+    // Filling (current state)
+    float state_angle = state* 2.0f * M_PI; // change to angle (state=1: full circle, 2 PI)
+    if (state > 0.0f)
+    {
+        video::S3DVertex vertices[vertices_count];
+
+        // state2: change from the polar coordinate to the rectangle one
+        float state2;
+        if (state <= 0.125f)
+        {
+            state2 = 0.125f*tanf(state_angle);
+        }
+        else if (state <= 0.375f)
+        {
+            state2 = 0.25f + 0.125f*tanf(state_angle - M_PI_2);
+        }
+        else if (state <= 0.625f)
+        {
+            state2 = 0.5f + 0.125f*tanf(state_angle - M_PI);
+        }
+        else if (state <= 0.875f)
+        {
+            state2 = 0.75f + 0.125f*tanf(state_angle - 3.0f * M_PI_2);
+        }
+        else
+        {
+            state2 = 1.0f - 0.125f*tanf(2.0f * M_PI - state_angle);
+        }
+        unsigned int count = computeVerticesForMeter(position, threshold, vertices, vertices_count,
+                                                     state2, icon_size, icon_size, offset);
+
+        drawMeterTexture(m_gauge_full_icon, vertices, count);
+    }
+
+#endif
+}   // drawEnergyMeter
+
+//-----------------------------------------------------------------------------
 /** Draws the rank of a player.
  *  \param kart The kart of the player.
  *  \param offset Offset of top left corner for this display (for splitscreen).
@@ -1273,14 +1522,13 @@ void RaceGUI::drawRank(const Kart *kart,
     oss << shown_number; // the current font has no . :(   << ".";
 
     core::recti pos;
-    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.64f*meter_width),
-                                           int(offset.Y - 0.49f*meter_height));
-    pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.64f*meter_width),
-                                          int(offset.Y - 0.49f*meter_height));
+    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 2.5f*meter_height));
+    pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 2.5f*meter_height));
 
-    font->setBlackBorder(true);
-    font->draw(oss.str().c_str(), pos, color, true, true);
-    font->setBlackBorder(false);
+    //static video::SColor color = video::SColor(255, 255, 255, 255);
+    if (RaceManager::get()->getNumberOfKarts() > 1)
+        font->draw(oss.str().c_str(), pos, color, true, true);
+
     font->setScale(1.0f);
 }   // drawRank
 
@@ -1327,6 +1575,28 @@ void RaceGUI::drawSpeedEnergyRank(const Kart* kart,
     const float speed =  kart->getSpeed();
 
     drawRank(kart, offset, min_ratio, meter_width, meter_height, dt);
+
+    if (0) //(RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_NORMAL_RACE ||
+        //RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_TIME_TRIAL ||
+        //RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_FOLLOW_LEADER)
+    {
+        drawNumericSpeed2(kart, offset, meter_width, meter_height);
+    }
+    else
+    {
+        //drawNumericSpeed(kart, offset, meter_width, meter_height);
+    }
+
+    /*
+    core::vector2df offset2;
+    offset2.X = (float) viewport.getCenter().X;
+    offset2.Y = (float) (viewport.getCenter().Y - 0.4*m_font_height);
+    int hub_width = m_font_height*12*0.4;
+    int hub_height = m_font_height*2*0.4;
+    drawHubSpeed(kart,offset2,hub_width,hub_height);
+    */
+
+    if(speed <=0) return;  // Nothing to do if speed is negative.
 
     // Draw the actual speed bar (if the speed is >0)
     // ----------------------------------------------
@@ -1462,10 +1732,10 @@ void RaceGUI::drawMeterTexture(video::ITexture *meter_texture, video::S3DVertex 
  *  at B with 0 and at C when it reaches the first threshold.
  *  If the measure is between the first and second thresholds, the function will create a quad ABCw,
  *  with w varying in the same way than v.
- *  If the measure exceds the higher threshold, the function will return the poly ABCDE.
+ *  If the measure exceeds the higher threshold, the function will return the poly ABCDE.
  *  
  *  \param position The relative positions of the vertices.
- *  \param threshold The thresholds at which the variable point switch from a segment to the next.
+ *  \param threshold The thresholds at which the variable point switches from a segment to the next.
  *                   The size of this array should be smaller by two than the position array.
  *                   The last threshold determines the measure over which the meter is full
  *  \param vertices Where the results of the computation are put, for use by the calling function.
@@ -1609,10 +1879,10 @@ void RaceGUI::drawLap(const Kart* kart,
         {
             d = font->getDimension(
                 (StringUtils::toWString(red_score) + L"-"
-                + StringUtils::toWString(blue_score) + L"00" // space between score and score limit (=width of two 0)
+                + StringUtils::toWString(blue_score) + L"0" // space between score and score limit (=width of one 0)
                 + StringUtils::toWString(score_limit)).c_str());
-            pos.UpperLeftCorner.X -= d.Width / 2;
             int icon_width = irr_driver->getActualScreenSize().Height/19;
+            pos.UpperLeftCorner.X = viewport.LowerRightCorner.X - (icon_width+20) - d.Width;
             core::rect<s32> indicator_pos(viewport.LowerRightCorner.X - (icon_width+10),
                                         pos.UpperLeftCorner.Y,
                                         viewport.LowerRightCorner.X - 10,
@@ -1636,7 +1906,7 @@ void RaceGUI::drawLap(const Kart* kart,
         pos += core::position2di(d.Width, 0);
         if (score_limit != -1)
         {
-            text = L"00";
+            text = L"0";
             d = font->getDimension(text.c_str());
             pos += core::position2di(d.Width, 0);
             // skip the space equal to the width of two zeros, then draw the score limit
@@ -1685,3 +1955,365 @@ void RaceGUI::drawLap(const Kart* kart,
     font->setScale(1.0f);
 #endif
 } // drawLap
+
+void RaceGUI::drawHeadingLine(const Kart* kart, float length)
+{
+#ifndef SERVER_ONLY
+    if (kart == NULL  || kart->hasFinishedRace()) return;
+    World* world = World::getWorld();
+    if (world->isGoalPhase()) return ;
+    // only show the line in soccer, FFA, and CTF
+    if (RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_3_STRIKES ||
+        RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_SOCCER ||
+        RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_FREE_FOR_ALL ||
+        RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_CAPTURE_THE_FLAG)
+    {
+        Vec3 kart_front_xyz = kart->getFrontXYZ();
+        // heading direction
+        float theta = kart->getHeading();
+        Vec3 line_end_xyz = kart_front_xyz + Vec3(length*sinf(theta),0.0,length*cosf(theta));
+        video::SColor line_color = video::SColor(255, 0, 255, 0);
+        draw3DLine(kart_front_xyz.toIrrVector(), line_end_xyz.toIrrVector(), line_color);
+        // visual skid direction
+        theta += kart->getSkidding()->getVisualSkidRotation();
+        line_end_xyz = kart_front_xyz + Vec3(length*sinf(theta),0.0,length*cosf(theta));
+        line_color = video::SColor(255, 0, 100, 0);
+        draw3DLine(kart_front_xyz.toIrrVector(), line_end_xyz.toIrrVector(), line_color);
+    }
+#endif
+} // drawHeadingLine
+
+void RaceGUI::drawBallLine(float length)
+{
+    SoccerWorld *soccer_world = dynamic_cast<SoccerWorld*>(World::getWorld());
+    Vec3 ball_xyz = soccer_world->getBallPosition();
+    float theta = soccer_world->getBallHeading();
+    // three colors to better understand the distance
+    Vec3 line_end_xyz = ball_xyz + Vec3(length*sinf(theta),0.0,length*cosf(theta));
+    video::SColor line_color = video::SColor(228, 26, 28, 0);
+    draw3DLine(ball_xyz.toIrrVector(), line_end_xyz.toIrrVector(), line_color);
+    ball_xyz = line_end_xyz;
+    line_end_xyz = ball_xyz + Vec3(length*sinf(theta),0.0,length*cosf(theta));
+    line_color = video::SColor(255, 127, 0, 0);
+    draw3DLine(ball_xyz.toIrrVector(), line_end_xyz.toIrrVector(), line_color);
+    ball_xyz = line_end_xyz;
+    line_end_xyz = ball_xyz + Vec3(length*sinf(theta),0.0,length*cosf(theta));
+    line_color = video::SColor(255, 255, 51, 0);
+    draw3DLine(ball_xyz.toIrrVector(), line_end_xyz.toIrrVector(), line_color);
+} // drawBallLine
+
+// Draw the numeric speedometer
+void RaceGUI::drawNumericSpeed(const Kart *kart,
+                               const core::vector2df &offset,
+                               int meter_width, int meter_height)
+{
+    static video::SColor color = video::SColor(255, 255, 255, 255);
+    gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
+
+    core::recti pos;
+    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.55f*meter_height));
+    pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.55f*meter_height));
+
+    std::ostringstream oss2;
+    oss2 << std::fixed << std::setprecision(1) << kart->getSpeed()/KILOMETERS_PER_HOUR; //
+
+    font->draw(oss2.str().c_str(), pos, color, true, true);
+
+    /*font->setScale(0.4f);
+    pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.45f*meter_height));
+    pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.45f*meter_height));
+
+    if (RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_SOCCER)
+    {   // show ball speed in soccer
+        SoccerWorld *soccer_world = dynamic_cast<SoccerWorld*>(World::getWorld());
+        std::ostringstream oss3;
+        oss3 << "ball " << std::fixed << std::setprecision(1) << soccer_world->getBallVelocity();
+        font->draw(oss3.str().c_str(), pos, color, true, true);
+        // show own score
+        KartTeam cur_team = soccer_world->getKartTeam(kart->getWorldKartId());
+        KartTeam opp_team = (cur_team == KART_TEAM_BLUE ? KART_TEAM_RED : KART_TEAM_BLUE);
+        std::vector<SoccerWorld::ScorerData> scorers = soccer_world->getScorers(cur_team);
+        unsigned int goal=0, own_goal=0;
+        for (unsigned int i = 0; i < scorers.size(); i++)
+            if (scorers.at(i).m_player == kart->getController()->getName())
+                goal++;
+        scorers = soccer_world->getScorers(opp_team);
+        for (unsigned int i = 0; i < scorers.size(); i++)
+            if (scorers.at(i).m_player == kart->getController()->getName())
+                own_goal++;
+        pos.LowerRightCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.40f*meter_height));
+        pos.UpperLeftCorner = core::vector2di(int(offset.X + 0.65f*meter_width), int(offset.Y - 0.40f*meter_height));
+        std::ostringstream oss4;
+        oss4 << "goal " << goal << " - " << own_goal;
+        font->draw(oss4.str().c_str(), pos, color, true, true);
+    }
+    else if (RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_NORMAL_RACE ||
+             RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_TIME_TRIAL ||
+             RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_FOLLOW_LEADER)
+    {   // show the average kart speed
+        if (!kart->hasFinishedRace())
+        {
+            m_final_speed_avg = 0.;
+            m_speed_sum += std::abs(kart->getSpeed()); // /KILOMETERS_PER_HOUR
+            m_speed_samples++;
+
+            float avg_speed(m_speed_sum/m_speed_samples);
+            std::ostringstream oss3;
+            oss3 << std::fixed << std::setprecision(1) << avg_speed << "/" << std::setprecision(3) << avg_speed*World::getWorld()->getTime()/3600;
+            font->draw(oss3.str().c_str(), pos, color, true, true);
+        }
+        else
+        {
+            if (m_final_speed_avg == 0.)
+            {
+                m_final_speed_avg = m_speed_sum/m_speed_samples;
+                m_final_distance = m_final_speed_avg*World::getWorld()->getTime()/3600;
+                m_speed_sum = 0.;
+                m_speed_samples = 0;
+            }
+
+            std::ostringstream oss3;
+            oss3 << std::fixed << std::setprecision(1) << m_final_speed_avg << "/" << std::setprecision(3) << m_final_distance;
+            color = video::SColor(255, 0, 255, 0);
+            font->draw(oss3.str().c_str(), pos, color, true, true);
+            color = video::SColor(255, 255, 255, 255);
+        }
+    }*/
+    // TODO: else show other useful information in CTF and FFA
+    font->setScale(1.0f);
+}
+
+// Draw a more detailed numeric speedometer
+void RaceGUI::drawNumericSpeed2(const Kart *kart,
+                               const core::vector2df &offset,
+                               int meter_width, int meter_height)
+{
+    static video::SColor color = video::SColor(255, 255, 255, 255);
+    static video::SColor color_red = video::SColor(255, 255, 0, 0);
+    static video::SColor color_green = video::SColor(255, 0, 255, 0);
+    gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
+
+    font->setScale(0.4f);
+    core::recti pos;
+    std::ostringstream oss;
+    float duration = 0.0f;
+
+    // current time
+    pos.LowerRightCorner = core::vector2di(int(offset.X - 0.2f*meter_width), int(offset.Y - 2.0f*meter_height + 0.4f*m_font_height));
+    pos.UpperLeftCorner  = core::vector2di(int(offset.X - 1.2f*meter_width), int(offset.Y - 2.0f*meter_height));
+    oss << std::fixed << std::setprecision(3) << "Time : " << World::getWorld()->getTime() << " s";
+    font->draw(oss.str().c_str(), pos, color, false, true);
+
+    // current speed / max. speed
+    pos.LowerRightCorner.Y += 0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    oss << std::fixed << std::setprecision(3) << "Speed: " << kart->getSpeed() << " m/s"; // /KILOMETERS_PER_HOUR
+    font->draw(oss.str().c_str(), pos, color, false, true);
+
+    pos.LowerRightCorner.Y += 0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    oss << std::fixed << std::setprecision(3) << "Max. : " << kart->getCurrentMaxSpeed() << " m/s"; // /KILOMETERS_PER_HOUR
+    font->draw(oss.str().c_str(), pos, color, false, true);
+
+    pos.LowerRightCorner.Y += 0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    oss << std::fixed << std::setprecision(2) << "Nitro: " << kart->getEnergy();
+    font->draw(oss.str().c_str(), pos, color, false, true);
+
+    pos.LowerRightCorner.Y += 0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    oss << "-----------------";
+    font->draw(oss.str().c_str(), pos, color, false, true);
+
+    pos.LowerRightCorner.Y += 0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    duration = (float)kart->getSpeedIncreaseTicksLeft(MaxSpeed::MS_INCREASE_ZIPPER);
+    if (duration > 0)
+    {
+        oss << std::fixed << std::setprecision(3) << "zipper : " << duration/100 << " s";
+        font->draw(oss.str().c_str(), pos, color_green, false, true);
+    }
+    else
+    {
+        oss << "zipper : ";
+        font->draw(oss.str().c_str(), pos, color, false, true);
+    }
+
+    pos.LowerRightCorner.Y += 0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    duration = (float)kart->getSpeedIncreaseTicksLeft(MaxSpeed::MS_INCREASE_NITRO);
+    if (duration > 0)
+    {
+        oss << std::fixed << std::setprecision(3) << "nitro  : " << duration/100 << " s";
+        font->draw(oss.str().c_str(), pos, color_green, false, true);
+    }
+    else
+    {
+        oss << "nitro  : ";
+        font->draw(oss.str().c_str(), pos, color, false, true);
+    }
+
+    pos.LowerRightCorner.Y += 0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    duration = (float)kart->getSpeedIncreaseTicksLeft(MaxSpeed::MS_INCREASE_SKIDDING);
+    if (duration > 0)
+    {
+        oss << std::fixed << std::setprecision(3) << "skid y : " << duration/100 << " s";
+        font->draw(oss.str().c_str(), pos, color_green, false, true);
+    }
+    else
+    {
+        oss << "skid y : ";
+        font->draw(oss.str().c_str(), pos, color, false, true);
+    }
+
+    pos.LowerRightCorner.Y += 0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    duration = (float)kart->getSpeedIncreaseTicksLeft(MaxSpeed::MS_INCREASE_RED_SKIDDING);
+    if (duration > 0)
+    {
+        oss << std::fixed << std::setprecision(3) << "skid r : " << duration/100 << " s";
+        font->draw(oss.str().c_str(), pos, color_green, false, true);
+    }
+    else
+    {
+        oss << "skid r : ";
+        font->draw(oss.str().c_str(), pos, color, false, true);
+    }
+
+    // show those related to item usage
+    if (RaceManager::get()->getMinorMode() != RaceManager::MINOR_MODE_TIME_TRIAL)
+    {
+        pos.LowerRightCorner.Y += 0.4f*m_font_height;
+        pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+        oss.str(""); oss.clear();
+        duration = (float)kart->getSpeedIncreaseTicksLeft(MaxSpeed::MS_INCREASE_SLIPSTREAM);
+        if (duration > 0)
+        {
+            oss << std::fixed << std::setprecision(3) << "slip st: " << duration/100 << " s";
+            font->draw(oss.str().c_str(), pos, color_green, false, true);
+        }
+        else
+        {
+            oss << "slip st: ";
+            font->draw(oss.str().c_str(), pos, color, false, true);
+        }
+
+        pos.LowerRightCorner.Y += 0.4f*m_font_height;
+        pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+        oss.str(""); oss.clear();
+        duration = (float)kart->getSpeedIncreaseTicksLeft(MaxSpeed::MS_INCREASE_RUBBER);
+        if (duration > 0)
+        {
+            oss << std::fixed << std::setprecision(3) << "rubber : " << duration/100 << " s";
+            font->draw(oss.str().c_str(), pos, color_green, false, true);
+        }
+        else
+        {
+            oss << "rubber : ";
+            font->draw(oss.str().c_str(), pos, color, false, true);
+        }
+    }
+
+    pos.LowerRightCorner.Y += 0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    duration = (float)kart->getSpeedDecreaseTicksLeft(MaxSpeed::MS_DECREASE_TERRAIN);
+    if (duration > 0)
+    {
+        oss << std::fixed << std::setprecision(3) << "terrain: " << duration/100 << " s"
+            << " [" << kart->getMaxSpeed()->getSlowdownFraction(MaxSpeed::MS_DECREASE_TERRAIN) << "]";
+        font->draw(oss.str().c_str(), pos, color_red, false, true);
+    }
+    else
+    {
+        oss << "terrain: ";
+        font->draw(oss.str().c_str(), pos, color, false, true);
+    }
+
+    // show those related to item usage
+    if (RaceManager::get()->getMinorMode() != RaceManager::MINOR_MODE_TIME_TRIAL)
+    {
+        pos.LowerRightCorner.Y += 0.4f*m_font_height;
+        pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+        oss.str(""); oss.clear();
+        duration = (float)kart->getSpeedDecreaseTicksLeft(MaxSpeed::MS_DECREASE_BUBBLE);
+        if (duration > 0)
+        {
+            oss << std::fixed << std::setprecision(3) << "bubble : " << duration/100 << " s"
+                << " [" << kart->getMaxSpeed()->getSlowdownFraction(MaxSpeed::MS_DECREASE_BUBBLE) << "]";
+            font->draw(oss.str().c_str(), pos, color_red, false, true);
+        }
+        else
+        {
+            oss << "bubble : ";
+            font->draw(oss.str().c_str(), pos, color, false, true);
+        }
+
+        pos.LowerRightCorner.Y += 0.4f*m_font_height;
+        pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+        oss.str(""); oss.clear();
+        duration = (float)kart->getSpeedDecreaseTicksLeft(MaxSpeed::MS_DECREASE_SQUASH);
+        if (duration > 0)
+        {
+            oss << std::fixed << std::setprecision(3) << "squash : " << duration/100 << " s"
+                << " [" << kart->getMaxSpeed()->getSlowdownFraction(MaxSpeed::MS_DECREASE_SQUASH) << "]";
+            font->draw(oss.str().c_str(), pos, color_red, false, true);
+        }
+        else
+        {
+            oss << "squash : ";
+            font->draw(oss.str().c_str(), pos, color, false, true);
+        }
+    }
+
+    pos.LowerRightCorner.Y += 6.0*0.4f*m_font_height;
+    pos.UpperLeftCorner.Y += 0.4f*m_font_height;
+    oss.str(""); oss.clear();
+    oss << "-----------------" << std::endl
+        << "Action    :" << (uint16_t) kart->getControls().getButtonsCompressed() << std::endl
+        << "Steer     :" << kart->getControls().getSteer() << std::endl
+        << "Accel     :" << kart->getControls().getAccel() << std::endl
+        << "Skid      :" << kart->getSkidding()->getSkidFactor() << std::endl
+        << "Skid state:" << (int)kart->getSkidding()->getSkidState() << std::endl;
+    font->draw(oss.str().c_str(), pos, color, false, true);
+
+    font->setScale(1.0f);
+}
+
+// draw a Hub to show the speed
+void RaceGUI::drawHubSpeed(const Kart *kart,
+                           const core::vector2df &offset,
+                           int hub_width,int hub_height)
+{
+
+    if (RaceManager::get()->getMinorMode() == RaceManager::MINOR_MODE_SOCCER)
+    {
+        SoccerWorld *soccer_world = dynamic_cast<SoccerWorld*>(World::getWorld());
+        static video::SColor color = video::SColor(255, 255, 255, 255);
+        gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
+        core::recti pos;
+        font->setScale(0.4f);
+        // draw the ball speed
+        pos.LowerRightCorner = core::vector2di(int(offset.X - 0.5f*hub_width), int(offset.Y));
+        pos.UpperLeftCorner  = core::vector2di(int(offset.X + 0.5f*hub_width), int(offset.Y - 0.5f*hub_height));
+        std::ostringstream oss;
+        oss << "Ball " << std::fixed << std::setprecision(1) << soccer_world->getBallVelocity();
+        font->draw(oss.str().c_str(), pos, color, true, true);
+        // draw the kart speed
+        pos.LowerRightCorner = core::vector2di(int(offset.X - 0.5f*hub_width), int(offset.Y - 0.5f*hub_height));
+        pos.UpperLeftCorner  = core::vector2di(int(offset.X + 0.5f*hub_width), int(offset.Y - 1.0f*hub_height));
+        std::ostringstream oss1;
+        oss1 << "Kart " << std::fixed << std::setprecision(1) << kart->getSpeed();
+        font->draw(oss1.str().c_str(), pos, color, true, true);
+        font->setScale(1.0f);
+    }
+}

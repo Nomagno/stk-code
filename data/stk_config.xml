@@ -189,6 +189,13 @@
   <replay max-frames="120000" delta-t="0.100"  delta-speed="0.6"
           delta-steering="0.26" />
 
+  <!--  Determines the minimap related values.
+        size: The size of the minimap (scaled afterwards) 480 = full screen height)
+        ai-icon: The size of the icons for the AI karts on the minimap.
+        player-icon: The size of the icons for the player karts. -->
+
+  <minimap size="360.0" ai-icon="28.0" player-icon="32.0"/>
+
   <!-- Special urls -->
   <urls donate="https://supertuxkart.net/Donate"
         password-reset="https://online.supertuxkart.net/password-reset.php"
@@ -268,7 +275,7 @@
        The field of views for 1-4 player split screen. fov-3 is
        actually not used (since 3 player split screen uses the
        same layout as 4 player split screen) -->
-  <camera fov-1="80" fov-2="65" fov-3="50" fov-4="75" cutscene-fov="0.61" />
+  <camera fov-1="110" fov-2="65" fov-3="50" fov-4="75" cutscene-fov="0.61" />
 
   <!-- Steer
        disable-while-unskid: Disable steering when stop skidding during

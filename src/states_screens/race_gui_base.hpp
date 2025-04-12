@@ -199,6 +199,9 @@ protected:
 
     video::ITexture *m_gauge_goal;
 
+    /** Texture for nitro icon. */
+    video::ITexture *m_gauge_full_icon;
+
     /** The frame around player karts in the mini map. */
     video::ITexture* m_icons_frame;
 

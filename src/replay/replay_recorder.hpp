@@ -98,7 +98,7 @@ public:
 
     const uint64_t getLastUID() { return m_last_uid; }
 
-    /** Functions to encode and decode attahcments and item types,
+    /** Functions to encode and decode attachments and item types,
         so that the stored value is independent from internal
         representation and resilient to such changes. */
     static int enumToCode (Attachment::AttachmentType type);

@@ -633,6 +633,7 @@ public:
      *  category.
      *  \param category Which category to report on. */
     virtual int   getSpeedIncreaseTicksLeft(unsigned int category) const;
+    virtual int   getSpeedDecreaseTicksLeft(unsigned int category) const;
     // ----------------------------------------------------------------------------------------
     /** Returns the speed of the kart in meters/second. */
     virtual float  getSpeed() const { return m_speed; }
@@ -644,6 +645,8 @@ public:
     /** This is used on the client side only to set the speed of the kart
      *  from the server information. */
     virtual void setSpeed(float s) { m_speed = s; }
+
+    virtual MaxSpeed *getMaxSpeed() const { return m_max_speed; };
 
     // ========================================================================================
     // STEERING and skidding related functions

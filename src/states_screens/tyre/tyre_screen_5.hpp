@@ -1,5 +1,5 @@
 //  SuperTuxKart - a fun racing game with go-kart
-//  Copyright (C) 2024 Nomagno
+//  Copyright (C) 2016 C. Michael Murphey
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -15,22 +15,22 @@
 //  along with this program; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-#ifndef HEADER_HELP_SCREEN_8_HPP
-#define HEADER_HELP_SCREEN_8_HPP
+#ifndef HEADER_TYRE_SCREEN_5_HPP
+#define HEADER_TYRE_SCREEN_5_HPP
 
 #include "guiengine/screen.hpp"
 
 namespace GUIEngine { class Widget; }
 
 /**
-  * \brief Help screen, part 8
+  * \brief Tyre screen, part 5
   * \ingroup states_screens
   */
-class HelpScreen8 : public GUIEngine::Screen, public GUIEngine::ScreenSingleton<HelpScreen8>
+class TyreScreen5 : public GUIEngine::Screen, public GUIEngine::ScreenSingleton<TyreScreen5>
 {
-    friend class GUIEngine::ScreenSingleton<HelpScreen8>;
+    friend class GUIEngine::ScreenSingleton<TyreScreen5>;
 
-    HelpScreen8();
+    TyreScreen5();
 
 public:
 

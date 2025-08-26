@@ -528,8 +528,8 @@ void Kart::reset()
 
     unsetSquash();
 
-    item_amount_last_lap = 0;
-    item_type_last_lap = PowerupManager::POWERUP_NOTHING;
+    m_item_amount_last_lap = 0;
+    m_item_type_last_lap = PowerupManager::POWERUP_NOTHING;
 
     m_last_used_powerup    = PowerupManager::POWERUP_NOTHING;
     m_race_position        = m_initial_position;
@@ -678,9 +678,9 @@ void Kart::instantSpeedIncrease(unsigned int category, float add_max_speed,
 
 // -----------------------------------------------------------------------------
 void Kart::setSlowdown(unsigned int category, float max_speed_fraction,
-                       int fade_in_time)
+                       int fade_in_time, int duration)
 {
-    m_max_speed->setSlowdown(category, max_speed_fraction,  fade_in_time);
+    m_max_speed->setSlowdown(category, max_speed_fraction,  fade_in_time, duration);
 }   // setSlowdown
 
 // -----------------------------------------------------------------------------
@@ -1424,11 +1424,17 @@ void Kart::setStartupBoostFromStartTicks(int ticks)
 void Kart::setStartupBoost(uint8_t boost_level)
 {
     std::vector<float> startup_times = m_kart_properties->getStartupTime();
-    int index = m_kart_properties->getStartupTime().size() - boost_level + 1;
-    assert(index >= 0 && index <= (int)m_kart_properties->getStartupTime().size());
 
-    m_startup_boost = m_kart_properties->getStartupBoost()[index];
-    m_startup_engine_force = m_kart_properties->getStartupEngineForce()[index];
+    if (boost_level >= 2) {
+        int index = m_kart_properties->getStartupTime().size() - boost_level + 1;
+        assert(index >= 0 && index < (int)m_kart_properties->getStartupTime().size());
+        m_startup_boost = m_kart_properties->getStartupBoost()[index];
+        m_startup_engine_force = m_kart_properties->getStartupEngineForce()[index];
+    } else {
+        m_startup_boost = 0;
+        m_startup_engine_force = 0;
+    }
+
     m_startup_boost_level = boost_level;
 }   // setStartupBoost
 
@@ -3121,8 +3127,18 @@ void Kart::updatePhysics(int ticks)
         m_skid_sound->stop();
     }
 
-    float steering = getMaxSteerAngle() * m_skidding->getSteeringFraction();
-    
+// example:
+// at skid_min_speed kart steers 30º
+// at at current speed, which is below, kart steers 60º
+// if we want kart to steer 30º at current speed, we need to steer
+    float steering;
+    if (m_skidding->isSkidding() && getSpeed() < m_kart_properties->getSkidMinSpeed()) {
+        // When below the minimum skidding speed, skid as if it was the minimum speed but without any boost
+        steering = getMaxSteerAngle(m_kart_properties->getSkidMinSpeed()) * (getMaxSteerAngle(m_kart_properties->getSkidMinSpeed())/getMaxSteerAngle()) * m_skidding->getSteeringFraction();        
+    } else {
+        steering = getMaxSteerAngle() * m_skidding->getSteeringFraction();
+    }
+
     m_vehicle->setSteeringValue(m_tyres->degTurnRadius(steering), 0);
     m_vehicle->setSteeringValue(m_tyres->degTurnRadius(steering), 1);
 
@@ -3187,36 +3203,10 @@ void Kart::updatePhysics(int ticks)
     // Cap speed if necessary
     const Material *m = getMaterial();
 
-    ItemPolicy *itempolicy = RaceManager::get()->getItemPolicy();
-    bool is_restart = itempolicy->m_virtualpace_code <= -3;
-    bool did_restart = false;
-    if (is_restart) {
-        // Reaffirm the penalty in case someone tried to be funny and pit for tyres in the middle of a safety car restart
-        m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_STOP, 0.1f, stk_config->time2Ticks(0.1f), -1);
-        int restart_time = -(itempolicy->m_virtualpace_code + 3);
-        float gap = itempolicy->m_policy_sections[itempolicy->m_leader_section].m_virtualpace_gaps;
-        gap *= getPosition();
-        restart_time += gap;
-        int current_time = World::getWorld()->getTime();
-        if (current_time > restart_time) {
-            // Set slowdown time to 0 (disable it) if its time to restart
-            m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_STOP, 0.1f, stk_config->time2Ticks(0.1f), stk_config->time2Ticks(0));
-            did_restart = true;
-        }
-    }
 
-    bool is_last = getPosition() == RaceManager::get()->getNumberOfKarts();
-
-    if (is_last && did_restart) {
-        itempolicy->m_virtualpace_code = -1;
-        itempolicy->m_restart_count = -1;
-    }
-
-    // the only reason such a ridiculous infinite pit penalty (-1) can be given is if it's a virtual pace car restart
-    // plainly, the only reason this exists is because first place won't get its penalty overturned if for some reason
-    if (itempolicy->m_virtualpace_code == -1 && m_max_speed->getSpeedDecreaseTicksLeft(MaxSpeed::MS_DECREASE_STOP) == -1) {
-        m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_STOP, 0.1f, stk_config->time2Ticks(0.1f), stk_config->time2Ticks(0));
-    }
+    ItemPolicy *item_policy = RaceManager::get()->getItemPolicy();
+    item_policy->enforceVirtualPaceCarRulesForKart(this);
+ 
 
     float min_speed =  m && m->isZipper() ? m->getZipperMinSpeed() : -1.0f;
     m_max_speed->setMinSpeed(min_speed);
@@ -3951,7 +3941,7 @@ void Kart::updateGraphics(float dt)
 
     // --------------------------------------------------------
     float nitro_frac = 0;
-    if ( (m_controls.getNitro() || m_min_nitro_ticks > 0) &&
+    if ( ((m_controls.getNitro() && !m_is_refueling) || m_min_nitro_ticks > 0) &&
          m_collected_energy > 0                               )
     {
         // fabs(speed) is important, otherwise the negative number will

@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <random>
 
+#include "utils/tme_constants.hpp"
+
 #include "challenges/unlock_manager.hpp"
 #include "config/player_manager.hpp"
 #include "config/saved_grand_prix.hpp"
@@ -179,6 +181,15 @@ void RaceManager::reset()
     m_num_finished_karts   = 0;
     m_num_finished_players = 0;
 }  // reset
+
+void RaceManager::setItemPolicy(std::string str)
+{
+    m_item_policy.fromString(str);
+    m_item_policy.m_leader_section = -1;
+    m_item_policy.m_virtual_pace_code = -1;
+    m_item_policy.m_restart_count = 0;
+}
+
 
 // ----------------------------------------------------------------------------
 /** Sets the default list of AI karts to use.
@@ -526,7 +537,7 @@ void RaceManager::startNew(bool from_overworld)
         for(unsigned int i = 0; i < m_num_ghost_karts; i++)
         {
             m_kart_status.push_back(KartStatus(ReplayPlay::get()->getGhostKartName(i),
-                i, -1, -1, init_gp_rank, KT_GHOST, 0, 2));
+                i, -1, -1, init_gp_rank, KT_GHOST, 0, TME_CONSTANT_DEFAULT_TYRE));
             init_gp_rank ++;
         }
     }
@@ -537,7 +548,7 @@ void RaceManager::startNew(bool from_overworld)
     for(unsigned int i = 0; i < ai_kart_count; i++)
     {
         m_kart_status.push_back(KartStatus(m_ai_kart_list[i], i, -1, -1,
-            init_gp_rank, KT_AI, 0, 2));
+            init_gp_rank, KT_AI, 0, TME_CONSTANT_DEFAULT_TYRE));
         init_gp_rank ++;
         if(UserConfigParams::m_ftl_debug)
         {
@@ -714,7 +725,7 @@ void RaceManager::startNextRace()
                 float length = ((float)m_num_laps[m_track_number])*track->getTrackLength();
                 m_kart_status[i].m_starting_tyre = selectTyre(UserConfigParams::m_tyre_selection_mode, length);
             } else { // We are in a mode where it doesn't make sense to select a tyre other than fixed
-                m_kart_status[i].m_starting_tyre = 10;
+                m_kart_status[i].m_starting_tyre = TME_CONSTANT_DEFAULT_TYRE;
             }
             
             printf("Selected tyre %u for AI\n", m_kart_status[i].m_starting_tyre); 
@@ -1323,7 +1334,7 @@ void RaceManager::startWatchingReplay(const std::string &track_ident,
     for(int i = 0; i < m_num_karts; i++)
     {
         m_kart_status.push_back(KartStatus(ReplayPlay::get()->getGhostKartName(i),
-            i, -1, -1, init_gp_rank, KT_GHOST, 0, 2));
+            i, -1, -1, init_gp_rank, KT_GHOST, 0, TME_CONSTANT_DEFAULT_TYRE));
         init_gp_rank ++;
     }
 

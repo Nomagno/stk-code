@@ -40,7 +40,7 @@ GhostKart::GhostKart(const std::string& ident, unsigned int world_kart_id,
                      const ReplayPlay::ReplayData& rd)
           : Kart(ident, world_kart_id,
                  position, btTransform(btQuaternion(0, 0, 0, 1)),
-                 0, 2,
+                 0, TME_CONSTANT_DEFAULT_TYRE,
                  std::make_shared<GE::GERenderInfo>(color_hue, true/*transparent*/)),
                  m_replay_data(rd), m_last_egg_idx(0)
 {
@@ -138,6 +138,8 @@ void GhostKart::update(int ticks)
     }
 
     if (idx == 0) {
+        m_tyres->m_reset_compound = true;
+        m_tyres->m_reset_fuel = true;
         m_tyres->reset();
         m_tyres->commandChange(m_all_bonus_info[idx].m_current_compound, 0);
     }

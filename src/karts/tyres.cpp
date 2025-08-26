@@ -56,6 +56,10 @@ Tyres::Tyres(Kart *kart) {
     // Boilerplate to initialize all the m_c_xxx constants
     #include "karts/tyres_boilerplate.txt"
 
+    m_c_fuel_rate_base = m_kart->getKartProperties()->getFuelConsumption();
+    m_c_fuel_weight_real = m_kart->getKartProperties()->getFuelMassReal();
+    m_c_fuel_weight_virtual = m_kart->getKartProperties()->getFuelMassVirtual();
+
     m_current_fuel = m_c_fuel;
 }
 
@@ -103,14 +107,14 @@ void Tyres::computeDegradation(float dt, bool is_on_ground, bool is_skidding, bo
     // Centripetal force
     m_force_y = ((speed*speed)/turn_radius)*effective_mass;
 
-    // If throttle is below 20% usage, user is "lift and coasting" and fuel consumption is reduced by 5%
+    // If throttle is below 20% usage, user is "lift and coasting" and fuel consumption is reduced by 12%
     float lift_and_coast_factor = 0;
     if (throttle_amount > 0.20f) {
         m_high_fuel_demand = true;
         lift_and_coast_factor = 1.0f;
     } else {
         m_high_fuel_demand = false;
-        lift_and_coast_factor = 0.95f;
+        lift_and_coast_factor = 0.88f;
     }
     /*The fuel rate factor is in L/km*/
     /*The base rate is immutable, while the regular rate can be modified on the fly by item policy*/
@@ -180,11 +184,11 @@ void Tyres::computeDegradation(float dt, bool is_on_ground, bool is_skidding, bo
     ;
 
     //printf("(%f; %f; %f)\n", m_kart->getXYZ().getX(), m_kart->getXYZ().getY(), m_kart->getXYZ().getZ());
-    printf("Cycle %20lu || K %s || C %u\n\ttrac: %f%% ||| turn: %f%%\n", m_debug_cycles, m_kart->getIdent().c_str(),
-    m_current_compound, 100.0f*(m_current_life_traction)/m_c_max_life_traction, 100.0f*(m_current_life_turning)/m_c_max_life_turning);
-    printf("\tCenter of gravity: (%f, %f)\n\tTurn: %f || Speed:%f || Brake: %f\n", m_force_x,
-    m_force_y, turn_radius, speed, brake_amount);
-    printf("\tFuel: %f || Weight: %f || RealWeight: %f || TrackLength: %f\n", m_current_fuel, effective_mass, m_kart->getMass(), Track::getCurrentTrack()->getTrackLength());
+    //printf("Cycle %20lu || K %s || C %u\n\ttrac: %f%% ||| turn: %f%%\n", m_debug_cycles, m_kart->getIdent().c_str(),
+    //m_current_compound, 100.0f*(m_current_life_traction)/m_c_max_life_traction, 100.0f*(m_current_life_turning)/m_c_max_life_turning);
+    //printf("\tCenter of gravity: (%f, %f)\n\tTurn: %f || Speed:%f || Brake: %f\n", m_force_x,
+    //m_force_y, turn_radius, speed, brake_amount);
+    //printf("\tFuel: %f || Weight: %f || RealWeight: %f || TrackLength: %f\n", m_current_fuel, effective_mass, m_kart->getMass(), Track::getCurrentTrack()->getTrackLength());
 }
 
 void Tyres::applyCrashPenalty(void) {
@@ -256,6 +260,33 @@ void Tyres::reset() {
 
     // Boilerplate to initialize all the m_c_xxx constants
     #include "karts/tyres_boilerplate.txt"
+
+    // This simply inits the constants into their corresponding variables
+    if (m_reset_compound) { // Only set these unconditionally at race start
+        m_c_fuel_rate_base = m_kart->getKartProperties()->getFuelConsumption();
+        m_c_fuel_weight_real = m_kart->getKartProperties()->getFuelMassReal();
+        m_c_fuel_weight_virtual = m_kart->getKartProperties()->getFuelMassVirtual();
+    }
+
+    if (m_reset_fuel) {
+        m_c_fuel_rate = 0; // Will be set to the appropiate one by itempolicy on pass by start/finish line
+        int fuel_mode = std::get<0>(RaceManager::get()->getFuelAndQueueInfo());
+        switch (fuel_mode) {
+        case 0: // Fuel off
+            m_c_fuel_rate_base = 0;
+            m_c_fuel_weight_real = 0;
+            m_c_fuel_weight_virtual = 0;
+            break;
+        case 1: // Weightless fuel, doesn't impact kart performance
+            m_c_fuel_weight_real = 0;
+            m_c_fuel_weight_virtual = 0;
+            break;
+        case 2: // Fuel on
+            break;
+        default:
+            break;
+        }
+    }
 
     if (m_reset_fuel) {
         m_kart->m_tyres_queue = std::get<2>(RaceManager::get()->getFuelAndQueueInfo());
@@ -363,6 +394,8 @@ void Tyres::commandChange(int compound, int time) {
     auto& stk_config = STKConfig::get();
     if (compound == 123) {
         // 123 is the code for a refueling
+        if (time <= 2.0)
+            time = 2.0;
         m_kart->m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_STOP, 0.1f, stk_config->time2Ticks(0.1f), stk_config->time2Ticks(time));
         m_kart->m_is_refueling = true;
         return;

@@ -36,7 +36,7 @@
 #include "network/remote_kart_info.hpp"
 #include "items/powerup_manager.hpp"
 #include "race/grand_prix_data.hpp"
-#include "race/itempolicy.hpp"
+#include "race/item_policy.hpp"
 #include "utils/vec3.hpp"
 #include "utils/types.hpp"
 
@@ -258,7 +258,7 @@ private:
 public:
 
     ItemPolicy m_item_policy;
-    void setItemPolicy(std::string str) { m_item_policy.fromString(str); m_item_policy.m_leader_section = -1; m_item_policy.m_virtualpace_code = -1; m_item_policy.m_restart_count = 0; } 
+    void setItemPolicy(std::string str);
     ItemPolicy *getItemPolicy() { return &m_item_policy; };
     
     /** This data structure accumulates kart data and race result data from
@@ -945,7 +945,7 @@ public:
     void addSpareTireKart(const std::string& name)
     {
         m_kart_status.push_back(KartStatus(name, 0, -1, -1,
-            -1, KT_SPARE_TIRE, 0, 2));
+            -1, KT_SPARE_TIRE, 0, TME_CONSTANT_DEFAULT_TYRE));
         m_num_spare_tire_karts++;
         m_num_karts++;
     }   // addSpareTireKart

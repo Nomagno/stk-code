@@ -18,6 +18,8 @@
 
 #include "network/protocols/client_lobby.hpp"
 
+#include "utils/tme_constants.hpp"
+
 #include "addons/addons_manager.hpp"
 #include "audio/music_manager.hpp"
 #include "audio/sfx_manager.hpp"
@@ -206,7 +208,7 @@ bool ClientLobby::notifyEvent(Event* event)
         case LE_UPDATE_PLAYER_LIST:    updatePlayerList(event);    break;
         case LE_CHAT:                  handleChat(event);          break;
         case LE_CONNECTION_ACCEPTED:   connectionAccepted(event);  break;
-        case LE_ITEMPOLICY:            handleItemPolicy(event);    break;
+        case LE_ITEM_POLICY:            handleItemPolicy(event);    break;
         case LE_SERVER_INFO:           handleServerInfo(event);    break;
         case LE_PLAYER_DISCONNECTED :  disconnectedPlayer(event);  break;
         case LE_CONNECTION_REFUSED:    connectionRefused(event);   break;
@@ -875,7 +877,7 @@ void ClientLobby::updatePlayerList(Event* event)
         lp.m_online_id = packet.online_id;
         uint8_t local_id = packet.local_player_id;
         lp.m_handicap = 0;
-        lp.m_starting_tyre = 2;
+        lp.m_starting_tyre = TME_CONSTANT_DEFAULT_TYRE;
         lp.m_local_player_id = local_id;
         lp.m_user_name = packet.profile_name;
         total_players += lp.m_user_name;

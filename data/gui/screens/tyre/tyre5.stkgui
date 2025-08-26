@@ -2,61 +2,106 @@
 <stkgui>
     <icon-button id="back" x="1%" y="0" height="9%" icon="gui/icons/back.png"/>
     <div x="1%" y="1%" width="98%" height="98%" layout="vertical-row" >
-        <header width="80%" height="8%" align="center" text="SuperTuxKart Help" text_align="center"/>
+        <header width="80%" height="8%" align="center" text="TyrePedia" text_align="center"/>
         <spacer height="1%" width="100%"/>
 
         <div width="100%" height="91%" layout="horizontal-row" >
 
             <vertical-tabs id="category" height="100%" width="20%">
-                <icon-button id="page1" width="128" height="128" icon="gui/icons/options_general.png"
-                        I18N="Tab in help menu" text="General"/>
-                <icon-button id="page2" width="128" height="128" icon="gui/icons/mode_ftl.png"
-                        I18N="Tab in help menu" text="Game Modes"/>
-                <icon-button id="page3" width="128" height="128" icon="gui/icons/gift.png"
-                        I18N="Tab in help menu" text="Powerups"/>
-                <icon-button id="page4" width="128" height="128" icon="gui/icons/banana.png"
-                        I18N="Tab in help menu" text="Bananas"/>
-                <icon-button id="page5" width="128" height="128" icon="gui/icons/story_mode_book.png"
-                        I18N="Tab in help menu" text="Story Mode"/>
-                <icon-button id="page6" width="128" height="128" icon="gui/icons/mass.png"
-                        I18N="Tab in help menu" text="Kart classes"/>
-                <icon-button id="page7" width="128" height="128" icon="gui/icons/options_input.png"
-                        I18N="Tab in help menu" text="Multiplayer"/>
-                <icon-button id="page8" width="128" height="128" icon="gui/icons/options_general.png"
-                        I18N="Tab in help menu" text="Tyres"/>
+                <icon-button id="page1" width="128" height="128" icon="gui/icons/android/drift.png"
+                        I18N="Tab in help menu" text="Tyre Types"/>
+                <icon-button id="page2" width="128" height="128" icon="gui/icons/android/drift.png"
+                        I18N="Tab in help menu" text="Degradation"/>
+                <icon-button id="page3" width="128" height="128" icon="gui/icons/android/drift.png"
+                        I18N="Tab in help menu" text="Settings"/>
+                <icon-button id="page4" width="128" height="128" icon="gui/icons/android/drift.png"
+                        I18N="Tab in help menu" text="Pits"/>
+                <icon-button id="page5" width="128" height="128" icon="gui/icons/android/drift.png"
+                        I18N="Tab in help menu" text="Fuel"/>
+                <icon-button id="page6" width="128" height="128" icon="gui/icons/android/drift.png"
+                        I18N="Tab in help menu" text="Some use cases"/>
             </vertical-tabs>
+
+
 
             <spacer width="2%" height="100%"/>
 
             <box width="78%" height="100%" layout="vertical-row">
                 <spacer height="1%" width="10"/>
-                <label align="center" word_wrap="true" text="The evil Nolok has captured Gnu! Here are a few tips to help you:"/>
+                <label align="left" word_wrap="true" text="Fuel saving:"/>
                 <spacer height="2%" width="10"/>
-                
-                <div width="100%" proportion="5" layout="horizontal-row">
-                    <icon align="center" width="8%" height="100%" icon="gui/icons/challenge.png"/>
-                    <spacer width="3%" height="100%"/>
-                    <bubble proportion="1" height="100%"
-                            I18N="In the help menu"
-                            text="This icon on the minimap shows the available challenges you've not completed. In the top-right of the screen, it also tells you how many points you currently have. Complete as many challenges as possible, and Nolok will accept to race against you. Win to liberate Gnu!"/>
-                </div>
-                
+
                 <div width="100%" proportion="4" layout="horizontal-row">
-                    <icon align="center" width="8%" height="100%" icon="gui/icons/cup_gold.png"/>
+                    <icon align="center" width="8%" height="100%" icon="gui/icons/android/steering_wheel.png"/>
                     <spacer width="3%" height="100%"/>
                     <bubble proportion="1" height="100%"
                             I18N="In the help menu"
-                            text="When you complete a challenge, you get a cup. Each cup is worth several points. The higher the difficulty you completed the challenge in, the better the cup and the more points it is worth."/>
+                            text="Cruise mode is enabled by releasing the accelerator and tapping the nitro button. Throttle will then be set to 40%."/>
                 </div>
-                
-                <div width="100%" proportion="3" layout="horizontal-row">
-                    <icon align="center" width="8%" height="100%" icon="gui/icons/mystery_unlock.png"/>
+                <spacer height="1%" width="10"/>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <spacer width="11%" height="100%"/>
+                    <bubble proportion="1" height="100%"
+                            I18N="In the help menu"
+                            text="It is meant to be used to consume less fuel during corners, and is a better alternative than pressing and releasing the accelerator button very fast, both in terms of fuel waste and of ease of use."/>
+                </div>
+                <spacer height="1%" width="10"/>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <spacer width="11%" height="100%"/>
+                    <bubble proportion="1" height="100%"
+                            I18N="In the help menu"
+                            text="It will be disabled if the brake or the accelerator are pressed again."/>
+                </div>
+                <spacer height="1%" width="10"/>
+                <label align="left" word_wrap="true" text="Fuel parameters:"/>
+                <spacer height="2%" width="10"/>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <icon align="center" width="8%" height="100%" icon="gui/icons/options_ui.png"/>
                     <spacer width="3%" height="100%"/>
                     <bubble proportion="1" height="100%"
                             I18N="In the help menu"
-                            text="When you get the number of points indicated below this icon, you'll be gifted a surprise. There are several to collect."/>
+                            text="Max fuel: The maximum fuel is always 1000. Starting fuel: 1-1000L"/>
+                </div>
+                <spacer height="1%" width="10"/>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <spacer width="11%" height="100%"/>
+                    <bubble proportion="1" height="100%"
+                            I18N="In the help menu"
+                            text="Fuel consumption: How many liters the engine consumes each kilometer. Fuel consumption will be half when you release the throttle."/>
+                </div>
+                <spacer height="1%" width="10"/>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <spacer width="11%" height="100%"/>
+                    <bubble proportion="1" height="100%"
+                            I18N="In the help menu"
+                            text="Fuel weight: at weight 1, 1000L = 10kgs. At weight 100, 1000L=1000kg. For scale, Tux weights 262kg."/>
+                </div>
+                <spacer height="1%" width="10"/>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <spacer width="11%" height="100%"/>
+                    <bubble proportion="1" height="100%"
+                            I18N="In the help menu"
+                            text="Fuel stop time: 0 means there is no penalty for putting 1000 liters into the tank. At pump speed 1, 1000 liters will take 1 second. At pump speed 1000, 1000 liters will take around 20 minutes."/>
+                </div>
+                <spacer height="1%" width="10"/>
+
+                <div width="100%" proportion="4" layout="horizontal-row">
+                    <spacer width="11%" height="100%"/>
+                    <bubble proportion="1" height="100%"
+                            I18N="In the help menu"
+                            text="Fuel regeneration: When the throttle is released, deceleration will make the engine regenerate fuel/energy. If the fuel weight is 0, this is equivalent to an electric system."/>
                 </div>
             </box>
+
+
+
+
         </div>
     </div>
 </stkgui>

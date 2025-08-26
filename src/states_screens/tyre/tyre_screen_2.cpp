@@ -1,5 +1,8 @@
 //  SuperTuxKart - a fun racing game with go-kart
 //  Copyright (C) 2009-2015 Marianne Gagnon
+//  Copyright (C) 2016 C. Michael Murphey
+//  Copyright (C) 2024-2025 Nomagno
+//  Copyright (C) 2025 Matahina
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -24,7 +27,7 @@ using namespace GUIEngine;
 
 TyreScreen2::TyreScreen2() : Screen("tyre/tyre2.stkgui")
 {
-}   // TyreScreen2
+}   // TyreSCreen2
 
 // -----------------------------------------------------------------------------
 
@@ -38,6 +41,7 @@ void TyreScreen2::eventCallback(Widget* widget, const std::string& name, const i
 {
     if (name == "category")
     {
+
         std::string selection = ((RibbonWidget*)widget)->getSelectionIDString(PLAYER_ID_GAME_MASTER);
 
         if (selection != "page2")

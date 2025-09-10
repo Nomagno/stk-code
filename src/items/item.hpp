@@ -30,6 +30,8 @@
 #include "utils/log.hpp"
 #include "utils/no_copy.hpp"
 #include "utils/vec3.hpp"
+#include "graphics/stk_text_billboard.hpp"
+
 
 #include <line3d.h>
 
@@ -160,6 +162,9 @@ public:
     void setDisappearCounter();
     int m_compound;
     int m_stop_time;
+    /** The text displayed above this itemState*/
+    STKTextBillboard *m_tb;
+
     virtual void collected(const Kart *kart);
     // ------------------------------------------------------------------------
     virtual ~ItemState() {}
@@ -352,6 +357,9 @@ private:
 
     /** Billboard that shows when the item is about to respawn */
     scene::ISceneNode* m_icon_node;
+
+    /** Billboard that the next powerup for bonus boxes */
+    scene::ISceneNode* m_powerup_node;
 
     /** Stores if the item was available in the previously rendered frame. */
     bool m_was_available_previously;

@@ -39,6 +39,7 @@
 #include "utils/tyre_utils.hpp"
 #include "font/bold_face.hpp"
 #include "font/font_manager.hpp"
+#include "items/powerup_manager.hpp"
 
 #include <IBillboardSceneNode.h>
 #include <IMeshSceneNode.h>
@@ -48,6 +49,8 @@ const float ICON_SIZE = 0.7f;
 const int SPARK_AMOUNT = 10;
 const float SPARK_SIZE = 0.4f;
 const float SPARK_SPEED_H = 1.0f;
+
+static std::pair<PowerupManager::PowerupType, int> respawnBonusBox(unsigned itemid);
 
 // ----------------------------------------------------------------------------
 /** Constructor.
@@ -201,6 +204,7 @@ void ItemState::collected(const Kart *kart)
         m_ticks_till_return = getRespawnTicks(m_type);
     }
 
+
     if (RaceManager::get()->isBattleMode())
     {
         m_ticks_till_return *= 3;
@@ -249,6 +253,7 @@ Item::Item(ItemType type, const Vec3& xyz, const Vec3& normal,
     : ItemState(type, owner)
 {
     m_icon_node = NULL;
+    m_powerup_node = NULL;
     m_was_available_previously = true;
     // Prevent appear animation at start
     m_animation_start_ticks = -9999;
@@ -396,6 +401,7 @@ Item::~Item()
             m_appear_anime_node->removeChild(m_icon_node);
         
         m_node->removeChild(m_appear_anime_node);
+        m_node->removeChild(m_powerup_node);
 
         irr_driver->removeNode(m_node);
         m_node->drop();
@@ -414,6 +420,29 @@ void Item::reset()
     m_was_available_previously = true;
     m_animation_start_ticks = -9999;
     ItemState::reset();
+
+    if (getType() == ITEM_BONUS_BOX) {
+        std::pair<PowerupManager::PowerupType, int> data = respawnBonusBox(getItemId());
+        BoldFace* bold_face = font_manager->getFont<BoldFace>();
+        m_compound = data.first;
+        m_stop_time = data.second;
+
+        if (m_powerup_node)
+            m_node->removeChild(m_powerup_node);
+        m_powerup_node = NULL;
+        auto powerup_icon = powerup_manager->getIcon(data.first);
+
+        if (powerup_icon)
+        {
+            m_powerup_node = irr_driver->addBillboard(core::dimension2df(1.0f, 1.0f),
+                                            powerup_icon, m_node);
+
+            m_powerup_node->setPosition(core::vector3df(0.0f, 1.5f, 0.0f));
+            m_powerup_node->setVisible(true);
+        }
+
+        //m_tb->init(StringUtils::utf8ToWide(powerup_manager->getPowerupAsString(data.first) + " " + std::to_string(data.second)), bold_face);
+    }
 
     if (m_node != NULL)
     {
@@ -441,27 +470,6 @@ void Item::handleNewMesh(ItemType type)
     hpr.setHPR(getOriginalRotation());
     m_node->setRotation(hpr.toIrrHPR());
 
-    if (type == ItemType::ITEM_TYRE_CHANGE) {
-        if (GUIEngine::isNoGraphics())
-            return;
-        BoldFace* bold_face = font_manager->getFont<BoldFace>();
-        STKTextBillboard* tb =
-            new STKTextBillboard(
-            GUIEngine::getSkin()->getColor("font::bottom"),
-            GUIEngine::getSkin()->getColor("font::top"),
-            m_node, irr_driver->getSceneManager(), -1,
-            core::vector3df(0.0f, 2.0f, 0.0f),
-            core::vector3df(0.5f, 0.5f, 0.5f));
-        //if (CVS->isGLSL())
-            tb->init(StringUtils::utf8ToWide(TyreUtils::getStringFromCompound(m_compound, false)), bold_face);
-        //else
-            //tb->initLegacy(StringUtils::utf8ToWide(StringUtils::getStringFromCompound(m_compound, false)), bold_face);
-        tb->drop();
-        // No need to store the reference to the billboard scene node:
-        // It has one reference to the parent, and will get deleted
-        // when the parent is deleted.
-    }
-
     if (m_icon_node)
         m_appear_anime_node->removeChild(m_icon_node);
     m_icon_node = NULL;
@@ -477,8 +485,89 @@ void Item::handleNewMesh(ItemType type)
         ((scene::IBillboardSceneNode*)m_icon_node)
             ->setColor(ItemManager::getGlowColor(type).toSColor());
     }
+
+    if (GUIEngine::isNoGraphics())
+        return;
+    m_tb =
+        new STKTextBillboard(
+        GUIEngine::getSkin()->getColor("font::bottom"),
+        GUIEngine::getSkin()->getColor("font::top"),
+        m_node, irr_driver->getSceneManager(), -1,
+        core::vector3df(0.0f, 2.0f, 0.0f),
+        core::vector3df(0.5f, 0.5f, 0.5f));
+
+    BoldFace* bold_face = font_manager->getFont<BoldFace>();
+    if (type == ItemType::ITEM_TYRE_CHANGE) {
+        m_tb->init(StringUtils::utf8ToWide(TyreUtils::getStringFromCompound(m_compound, false)), bold_face);
+    } else {
+
+    }
+
 #endif
 }   // handleNewMesh
+
+// ------------------------------------------------------------------------
+static int simplePRNG(const int seed, const int time, const int item_id, const int position)
+{
+    const int c = 12345*(1+2*time); // This is always an odd number
+
+    const int a = 1103515245;
+    int rand = a*(seed + c);
+    if (rand < 0)
+    {
+        // We substract 2^31, which sends back the number to the positives
+        // while keeping the same value modulo 2^31
+        rand += -2147483648;
+    }
+    if (position > 0 && position > item_id)
+        return simplePRNG(rand, time, item_id, position-1);
+    else if (item_id > 0)
+        return simplePRNG(-2147483648 - rand, time, item_id-1, 0);
+
+    // Return the final value and drop the lower order bits
+    return (rand/65536);
+} // simplePRNG
+
+// ------------------------------------------------------------------------
+static std::pair<PowerupManager::PowerupType, int> respawnBonusBox(unsigned itemid)
+{
+
+    unsigned int n=1;
+    PowerupManager::PowerupType new_powerup;
+    World *world = World::getWorld();
+
+    // Determine a 'random' number based on time, index of the item,
+    // and position of the kart ([TME: position fixed to 1]). The idea is that this process is
+    // randomly enough to get the right distribution of the powerups,
+    // does not involve additional network communication to keep 
+    // client and server in sync, and is not exploitable.
+    const int time = world->getTicksSinceStart() / STKConfig::get()->time2Ticks(0.083334f);
+    int random_number = 0;
+
+    // Pick a random number
+    // If not in full random mode, check that's not in one of the already used buckets
+    for (unsigned int i=0; i<30;i++)
+    {
+        // Random_number is in the range 0-32767 
+        random_number = simplePRNG((int)(powerup_manager->getRandomSeed()+i),
+                                    time+1000*i, itemid, 1);
+
+        // Make sure the random number is equally likely to be in any
+        // of the buckets
+        if (random_number > (32767 - (32768 % BUCKET_COUNT)))
+            continue;
+    }
+
+    new_powerup = powerup_manager->getRandomPowerup(1, &n, 
+                                                    random_number);
+
+    auto& stk_config = STKConfig::get();
+
+    // Always add a new powerup
+    return std::pair(new_powerup, n);
+
+    // TODO: [TME] remove or rework other collection modes
+}
 
 // ----------------------------------------------------------------------------
 /** Updated the item - rotates it, takes care of items coming back into
@@ -506,11 +595,51 @@ void Item::updateGraphics(float dt)
     m_node->setVisible(is_visible);
     m_node->setPosition(getXYZ().toIrrVector());
 
+    if (getType() == ITEM_BONUS_BOX) {
+        if (m_powerup_node)
+            m_powerup_node->setVisible(true);
+    } else {
+        if (m_powerup_node)
+            m_powerup_node->setVisible(false);
+    }
+
+    if (time_till_return > 0.1f) {
+        if (getType() == ITEM_BONUS_BOX) {
+            if (m_powerup_node)
+                m_node->removeChild(m_powerup_node);
+            m_powerup_node = NULL;
+            //m_tb->clearBuffer();
+        }
+    }
+
     if (!m_was_available_previously && isAvailable())
     {
         // Play animation when item respawns
         m_animation_start_ticks = World::getWorld()->getTicksSinceStart();
         m_node->setScale(core::vector3df(0.0f, 0.0f, 0.0f));
+
+        if (getType() == ITEM_BONUS_BOX) {
+            std::pair<PowerupManager::PowerupType, int> data = respawnBonusBox(getItemId());
+            BoldFace* bold_face = font_manager->getFont<BoldFace>();
+            m_compound = data.first;
+            m_stop_time = data.second;
+            if (m_powerup_node)
+                m_node->removeChild(m_powerup_node);
+
+            m_powerup_node = NULL;
+            auto powerup_icon = powerup_manager->getIcon(data.first);
+
+            if (powerup_icon)
+            {
+                m_powerup_node = irr_driver->addBillboard(core::dimension2df(1.0f, 1.0f),
+                                                powerup_icon, m_node);
+
+                m_powerup_node->setPosition(core::vector3df(0.0f, 1.5f, 0.0f));
+                m_powerup_node->setVisible(true);
+            }
+
+            //m_tb->init(StringUtils::utf8ToWide(powerup_manager->getPowerupAsString(data.first) + " " + std::to_string(data.second)), bold_face);
+        }
     }
 
     float time_since_return = stk_config->ticks2Time(
@@ -662,3 +791,4 @@ bool Item::hitKart(const Vec3 &xyz, const Kart *kart) const
 
     return lc.length2() < m_distance_2;
 }   // hitKart
+

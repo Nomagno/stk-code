@@ -66,7 +66,7 @@ ItemState::ItemState(ItemType type, const Kart *owner, int id)
     m_compound = 0;
     m_stop_time = 0;
     m_used_up_counter = -1;
-    printf("Constructor for item %u\n", id);
+    //printf("Constructor for item %u\n", id);
     if (owner)
         setDeactivatedTicks(STKConfig::get()->time2Ticks(1.5f));
     else
@@ -93,7 +93,7 @@ ItemState::ItemState(const BareNetworkString& buffer)
     m_compound = buffer.getUInt8();
     m_stop_time = buffer.getUInt8();
 
-    printf("Restored for %u: powerup %u\n", m_item_id, m_compound);
+    //printf("Restored for %u: powerup %u\n", m_item_id, m_compound);
 }   // ItemState(const BareNetworkString& buffer)
 
 // ------------------------------------------------------------------------
@@ -128,7 +128,7 @@ void ItemState::initItem(ItemType type, const Vec3& xyz, const Vec3& normal, int
     m_ticks_till_return = 0;
     m_compound = compound;
     m_stop_time = stop_time;
-    printf("Item init for %u: powerup %u\n", m_item_id, m_compound);
+    //printf("Item init for %u: powerup %u\n", m_item_id, m_compound);
     setDisappearCounter();
 }   // initItem
 
@@ -429,7 +429,7 @@ void Item::reset()
         if (m_powerup_node)
             m_node->removeChild(m_powerup_node);
         m_powerup_node = NULL;
-        printf("Graphical Init from reset with c%d\n", m_compound);
+        //printf("Graphical Init from reset with c%d\n", m_compound);
         auto powerup_icon = powerup_manager->getIcon(m_compound);
         if (powerup_icon)
         {
@@ -542,11 +542,11 @@ void ItemState::respawnBonusBox(unsigned itemid)
     m_stop_time = n;
 
     if (NetworkConfig::get()->isServer()) {
-        printf("Server respawn for %u: %d %d, result: powerup %u\n", itemid, time, powerup_manager->getRandomSeed(), m_compound);
+        //printf("Server respawn for %u: %d %d, result: powerup %u\n", itemid, time, powerup_manager->getRandomSeed(), m_compound);
     }
 
     if (!NetworkConfig::get()->isServer()) {
-        printf("Client respawn for %u: %d %d, result: powerup %u\n", itemid, time, powerup_manager->getRandomSeed(), m_compound);
+        //printf("Client respawn for %u: %d %d, result: powerup %u\n", itemid, time, powerup_manager->getRandomSeed(), m_compound);
     }
 
     // TODO: [TME] remove or rework other collection modes
@@ -604,7 +604,7 @@ void Item::updateGraphics(float dt)
                 m_node->removeChild(m_powerup_node);
             m_powerup_node = NULL;
 
-            printf("Graphical Init from updateGraphics with c%d\n", m_compound);
+            //printf("Graphical Init from updateGraphics with c%d\n", m_compound);
             auto powerup_icon = powerup_manager->getIcon((PowerupManager::PowerupType)m_compound);
             if (powerup_icon)
             {

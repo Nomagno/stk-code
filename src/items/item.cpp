@@ -29,6 +29,7 @@
 #include "items/item_manager.hpp"
 #include "karts/kart.hpp"
 #include "modes/world.hpp"
+#include "network/network_config.hpp"
 #include "network/network_string.hpp"
 #include "network/rewind_manager.hpp"
 #include "tracks/arena_graph.hpp"
@@ -50,8 +51,6 @@ const int SPARK_AMOUNT = 10;
 const float SPARK_SIZE = 0.4f;
 const float SPARK_SPEED_H = 1.0f;
 
-static std::pair<PowerupManager::PowerupType, int> respawnBonusBox(unsigned itemid);
-
 // ----------------------------------------------------------------------------
 /** Constructor.
  *  \param type Type of the item.
@@ -67,6 +66,7 @@ ItemState::ItemState(ItemType type, const Kart *owner, int id)
     m_compound = 0;
     m_stop_time = 0;
     m_used_up_counter = -1;
+    printf("Constructor for item %u\n", id);
     if (owner)
         setDeactivatedTicks(STKConfig::get()->time2Ticks(1.5f));
     else
@@ -90,8 +90,10 @@ ItemState::ItemState(const BareNetworkString& buffer)
     int8_t kart_id = buffer.getUInt8();
     if (kart_id != -1)
         m_previous_owner = World::getWorld()->getKart(kart_id);
-   m_compound = buffer.getUInt8();
-   m_stop_time = buffer.getUInt8();
+    m_compound = buffer.getUInt8();
+    m_stop_time = buffer.getUInt8();
+
+    printf("Restored for %u: powerup %u\n", m_item_id, m_compound);
 }   // ItemState(const BareNetworkString& buffer)
 
 // ------------------------------------------------------------------------
@@ -126,6 +128,7 @@ void ItemState::initItem(ItemType type, const Vec3& xyz, const Vec3& normal, int
     m_ticks_till_return = 0;
     m_compound = compound;
     m_stop_time = stop_time;
+    printf("Item init for %u: powerup %u\n", m_item_id, m_compound);
     setDisappearCounter();
 }   // initItem
 
@@ -183,6 +186,7 @@ void ItemState::update(int ticks)
 void ItemState::collected(const Kart *kart)
 {
     auto& stk_config = STKConfig::get();
+    
     if (m_type == ITEM_EASTER_EGG)
     {
         // They will disappear 'forever'
@@ -203,7 +207,6 @@ void ItemState::collected(const Kart *kart)
     {
         m_ticks_till_return = getRespawnTicks(m_type);
     }
-
 
     if (RaceManager::get()->isBattleMode())
     {
@@ -421,17 +424,13 @@ void Item::reset()
     m_animation_start_ticks = -9999;
     ItemState::reset();
 
-    if (getType() == ITEM_BONUS_BOX) {
-        std::pair<PowerupManager::PowerupType, int> data = respawnBonusBox(getItemId());
-        BoldFace* bold_face = font_manager->getFont<BoldFace>();
-        m_compound = data.first;
-        m_stop_time = data.second;
 
+    if (!GUIEngine::isNoGraphics() && getType() == ITEM_BONUS_BOX) {
         if (m_powerup_node)
             m_node->removeChild(m_powerup_node);
         m_powerup_node = NULL;
-        auto powerup_icon = powerup_manager->getIcon(data.first);
-
+        printf("Graphical Init from reset with c%d\n", m_compound);
+        auto powerup_icon = powerup_manager->getIcon(m_compound);
         if (powerup_icon)
         {
             m_powerup_node = irr_driver->addBillboard(core::dimension2df(1.0f, 1.0f),
@@ -440,8 +439,6 @@ void Item::reset()
             m_powerup_node->setPosition(core::vector3df(0.0f, 1.5f, 0.0f));
             m_powerup_node->setVisible(true);
         }
-
-        //m_tb->init(StringUtils::utf8ToWide(powerup_manager->getPowerupAsString(data.first) + " " + std::to_string(data.second)), bold_face);
     }
 
     if (m_node != NULL)
@@ -488,16 +485,16 @@ void Item::handleNewMesh(ItemType type)
 
     if (GUIEngine::isNoGraphics())
         return;
-    m_tb =
-        new STKTextBillboard(
-        GUIEngine::getSkin()->getColor("font::bottom"),
-        GUIEngine::getSkin()->getColor("font::top"),
-        m_node, irr_driver->getSceneManager(), -1,
-        core::vector3df(0.0f, 2.0f, 0.0f),
-        core::vector3df(0.5f, 0.5f, 0.5f));
 
     BoldFace* bold_face = font_manager->getFont<BoldFace>();
     if (type == ItemType::ITEM_TYRE_CHANGE) {
+        m_tb =
+            new STKTextBillboard(
+            GUIEngine::getSkin()->getColor("font::bottom"),
+            GUIEngine::getSkin()->getColor("font::top"),
+            m_node, irr_driver->getSceneManager(), -1,
+            core::vector3df(0.0f, 2.0f, 0.0f),
+            core::vector3df(0.5f, 0.5f, 0.5f));
         m_tb->init(StringUtils::utf8ToWide(TyreUtils::getStringFromCompound(m_compound, false)), bold_face);
     } else {
 
@@ -507,29 +504,18 @@ void Item::handleNewMesh(ItemType type)
 }   // handleNewMesh
 
 // ------------------------------------------------------------------------
-static int simplePRNG(const int seed, const int time, const int item_id, const int position)
+static int simplePRNG(const unsigned seed, const unsigned time, const unsigned item_id, const unsigned position, Vec3 pos)
 {
-    const int c = 12345*(1+2*time); // This is always an odd number
+    const unsigned c = 12345*(1+2*time); // This is always an odd number
 
-    const int a = 1103515245;
-    int rand = a*(seed + c);
-    if (rand < 0)
-    {
-        // We substract 2^31, which sends back the number to the positives
-        // while keeping the same value modulo 2^31
-        rand += -2147483648;
-    }
-    if (position > 0 && position > item_id)
-        return simplePRNG(rand, time, item_id, position-1);
-    else if (item_id > 0)
-        return simplePRNG(-2147483648 - rand, time, item_id-1, 0);
+    const unsigned a = 1103515245;
+    int rand = a*(seed + c + item_id)+(unsigned)(pos.x()*2.0+1)*(unsigned)(pos.y()*2.0+2)*(unsigned)(pos.z()*2.0+3);
 
-    // Return the final value and drop the lower order bits
-    return (rand/65536);
+    return rand;
 } // simplePRNG
 
 // ------------------------------------------------------------------------
-static std::pair<PowerupManager::PowerupType, int> respawnBonusBox(unsigned itemid)
+void ItemState::respawnBonusBox(unsigned itemid)
 {
 
     unsigned int n=1;
@@ -541,30 +527,27 @@ static std::pair<PowerupManager::PowerupType, int> respawnBonusBox(unsigned item
     // randomly enough to get the right distribution of the powerups,
     // does not involve additional network communication to keep 
     // client and server in sync, and is not exploitable.
-    const int time = world->getTicksSinceStart() / STKConfig::get()->time2Ticks(0.083334f);
+    const int time = world->getTicksSinceStart() / 60;
     int random_number = 0;
 
-    // Pick a random number
-    // If not in full random mode, check that's not in one of the already used buckets
-    for (unsigned int i=0; i<30;i++)
-    {
-        // Random_number is in the range 0-32767 
-        random_number = simplePRNG((int)(powerup_manager->getRandomSeed()+i),
-                                    time+1000*i, itemid, 1);
+    // Random_number is in the range 0-32767 
+    random_number = simplePRNG(powerup_manager->getRandomSeed(), time, itemid, 1, m_xyz);
 
-        // Make sure the random number is equally likely to be in any
-        // of the buckets
-        if (random_number > (32767 - (32768 % BUCKET_COUNT)))
-            continue;
-    }
-
-    new_powerup = powerup_manager->getRandomPowerup(1, &n, 
-                                                    random_number);
+    new_powerup = powerup_manager->getRandomPowerup(1, &n, random_number);
 
     auto& stk_config = STKConfig::get();
 
-    // Always add a new powerup
-    return std::pair(new_powerup, n);
+
+    m_compound = new_powerup;
+    m_stop_time = n;
+
+    if (NetworkConfig::get()->isServer()) {
+        printf("Server respawn for %u: %d %d, result: powerup %u\n", itemid, time, powerup_manager->getRandomSeed(), m_compound);
+    }
+
+    if (!NetworkConfig::get()->isServer()) {
+        printf("Client respawn for %u: %d %d, result: powerup %u\n", itemid, time, powerup_manager->getRandomSeed(), m_compound);
+    }
 
     // TODO: [TME] remove or rework other collection modes
 }
@@ -595,7 +578,7 @@ void Item::updateGraphics(float dt)
     m_node->setVisible(is_visible);
     m_node->setPosition(getXYZ().toIrrVector());
 
-    if (getType() == ITEM_BONUS_BOX) {
+    if (getType() == ITEM_BONUS_BOX && isAvailable()) {
         if (m_powerup_node)
             m_powerup_node->setVisible(true);
     } else {
@@ -606,9 +589,7 @@ void Item::updateGraphics(float dt)
     if (time_till_return > 0.1f) {
         if (getType() == ITEM_BONUS_BOX) {
             if (m_powerup_node)
-                m_node->removeChild(m_powerup_node);
-            m_powerup_node = NULL;
-            //m_tb->clearBuffer();
+                m_powerup_node->setVisible(false);
         }
     }
 
@@ -619,16 +600,12 @@ void Item::updateGraphics(float dt)
         m_node->setScale(core::vector3df(0.0f, 0.0f, 0.0f));
 
         if (getType() == ITEM_BONUS_BOX) {
-            std::pair<PowerupManager::PowerupType, int> data = respawnBonusBox(getItemId());
-            BoldFace* bold_face = font_manager->getFont<BoldFace>();
-            m_compound = data.first;
-            m_stop_time = data.second;
             if (m_powerup_node)
                 m_node->removeChild(m_powerup_node);
-
             m_powerup_node = NULL;
-            auto powerup_icon = powerup_manager->getIcon(data.first);
 
+            printf("Graphical Init from updateGraphics with c%d\n", m_compound);
+            auto powerup_icon = powerup_manager->getIcon((PowerupManager::PowerupType)m_compound);
             if (powerup_icon)
             {
                 m_powerup_node = irr_driver->addBillboard(core::dimension2df(1.0f, 1.0f),
@@ -637,8 +614,6 @@ void Item::updateGraphics(float dt)
                 m_powerup_node->setPosition(core::vector3df(0.0f, 1.5f, 0.0f));
                 m_powerup_node->setVisible(true);
             }
-
-            //m_tb->init(StringUtils::utf8ToWide(powerup_manager->getPowerupAsString(data.first) + " " + std::to_string(data.second)), bold_face);
         }
     }
 

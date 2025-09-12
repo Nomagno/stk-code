@@ -162,6 +162,12 @@ public:
     void setDisappearCounter();
     int m_compound;
     int m_stop_time;
+    void respawnBonusBox(unsigned itemid);
+
+
+    /** stores the powerup to draw above item boxes  */
+    int m_graphical_powerup;
+
     /** The text displayed above this itemState*/
     STKTextBillboard *m_tb;
 
@@ -221,6 +227,8 @@ public:
             setType(m_original_type);
             m_original_type = ITEM_NONE;
         }
+        if (m_type == ITEM_BONUS_BOX)
+            respawnBonusBox(getItemId());
     }   // reset
 
     // -----------------------------------------------------------------------

@@ -581,6 +581,15 @@ void Item::updateGraphics(float dt)
     if (getType() == ITEM_BONUS_BOX && isAvailable()) {
         if (m_powerup_node)
             m_powerup_node->setVisible(true);
+        else {
+            auto powerup_icon = powerup_manager->getIcon((PowerupManager::PowerupType)m_compound);
+            if (powerup_icon) {
+                m_powerup_node = irr_driver->addBillboard(core::dimension2df(1.0f, 1.0f),
+                                                powerup_icon, m_node);
+                m_powerup_node->setPosition(core::vector3df(0.0f, 1.5f, 0.0f));
+                m_powerup_node->setVisible(true);
+            }
+       }
     } else {
         if (m_powerup_node)
             m_powerup_node->setVisible(false);
@@ -610,7 +619,6 @@ void Item::updateGraphics(float dt)
             {
                 m_powerup_node = irr_driver->addBillboard(core::dimension2df(1.0f, 1.0f),
                                                 powerup_icon, m_node);
-
                 m_powerup_node->setPosition(core::vector3df(0.0f, 1.5f, 0.0f));
                 m_powerup_node->setVisible(true);
             }

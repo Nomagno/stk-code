@@ -227,7 +227,7 @@ public:
             setType(m_original_type);
             m_original_type = ITEM_NONE;
         }
-        if (m_type == ITEM_BONUS_BOX)
+        if (m_type == ITEM_BONUS_BOX || m_type == ITEM_BANANA) // bananas also get an initial powerup in case they get switched
             respawnBonusBox(getItemId());
     }   // reset
 

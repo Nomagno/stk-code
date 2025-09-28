@@ -41,6 +41,7 @@
 #include "race/highscore_manager.hpp"
 #include "race/race_manager.hpp"
 #include "states_screens/state_manager.hpp"
+#include "states_screens/dialogs/item_policy_dialog.hpp"
 #include "tracks/track.hpp"
 #include "utils/string_utils.hpp"
 #include "utils/translation.hpp"
@@ -61,6 +62,26 @@ TrackInfoScreen::TrackInfoScreen()
 {
 }   // TrackInfoScreen
 
+void TrackInfoScreen::buildRulesFileListAndSpinner() {
+    std::set<std::string> files;
+    file_manager->listFiles(files, file_manager->getUserConfigFile("/rules/"));
+
+    m_rule_files.clear();
+    for(std::string file : files)
+        m_rule_files.push_back(file);
+
+    if (!m_rules_spinner) return;
+
+    m_rules_spinner->clearLabels();
+    m_rules_spinner->addLabel(_("None"));
+    for(std::string file : m_rule_files)
+    {
+        printf("FILE: %s\n", file.c_str());
+        if (file != ".." && file != ".")
+            m_rules_spinner->addLabel(irr::core::stringw(file.c_str()));
+    }   // for all files in the currently handled directory
+}
+
 // ----------------------------------------------------------------------------
 /* Saves some often used pointers. */
 void TrackInfoScreen::loadedFromFile()
@@ -73,6 +94,10 @@ void TrackInfoScreen::loadedFromFile()
     m_target_type_div       = getWidget<Widget>("target-type-div");
     m_target_value_spinner  = getWidget<SpinnerWidget>("target-value-spinner");
     m_target_value_label    = getWidget<LabelWidget>("target-value-text");
+
+    m_rules_spinner  = getWidget<SpinnerWidget>("rules-spinner");
+    m_rules_label    = getWidget<LabelWidget>("rules-text");
+
     m_ai_kart_spinner       = getWidget<SpinnerWidget>("ai-spinner");
     m_ai_kart_label         = getWidget<LabelWidget>("ai-text");
     m_option                = getWidget<CheckBoxWidget>("option");
@@ -172,6 +197,15 @@ void TrackInfoScreen::init()
 
     m_target_value_spinner->setVisible(false);
     m_target_value_label->setVisible(false);
+
+    RaceManager::get()->setItemPolicy("normal");
+    buildRulesFileListAndSpinner();
+    m_rules_spinner->setValue(0);
+    m_rules_spinner->setVisible(true);
+    m_rules_label->setVisible(true);
+    m_rules_label->setText(_("Rules:") , false);
+
+    RaceManager::get()->setItemPolicy("normal");
 
     m_ai_blue_spinner->setVisible(false);
     m_ai_blue_label->setVisible(false);
@@ -642,6 +676,21 @@ void TrackInfoScreen::eventCallback(Widget* widget, const std::string& name,
             onEnterPressedInternal();
         else if(button=="back")
             StateManager::get()->escapePressed();
+    }
+    else if (name == "rule-buttons")
+    {
+        const std::string &button = getWidget<GUIEngine::RibbonWidget>("rule-buttons")
+                                  ->getSelectionIDString(PLAYER_ID_GAME_MASTER);
+        if(button=="edit" && m_rules_spinner->getValue() != 0) {
+            std::wstring tmp1 = m_rules_spinner->getStringValueFromID(m_rules_spinner->getValue()).c_str();
+            std::string tmp2( tmp1.begin(), tmp1.end() );
+            new ItemPolicyDialog(tmp2); // Automatically saves to global itempolicy if needed
+        } else if(button=="new") {
+            new ItemPolicyDialog(std::to_string(m_rule_files.size()) + ".xml"); // Automatically creates to file if needed
+        } else if(button=="delete") {
+            ; // TODO: implement a file deletal prompt
+        }
+        buildRulesFileListAndSpinner();
     }
     else if (name == "back")
     {

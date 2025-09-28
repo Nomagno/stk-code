@@ -81,6 +81,12 @@ class TrackInfoScreen : public GUIEngine::Screen,
     /** The label besides the target value spinner. */
     GUIEngine::LabelWidget* m_target_value_label;
 
+    /** Spinner for rules */
+    GUIEngine::SpinnerWidget* m_rules_spinner;
+
+    /** The label besides the rules textbox. */
+    GUIEngine::LabelWidget* m_rules_label;
+
     /** Spinner for number of AI karts. */
     GUIEngine::SpinnerWidget* m_ai_kart_spinner;
 
@@ -103,6 +109,8 @@ class TrackInfoScreen : public GUIEngine::Screen,
     
     int m_icon_unknown_kart;
 
+    std::vector<std::string> m_rule_files;
+    void buildRulesFileListAndSpinner();
     void updateHighScores();
     void setSoccerWidgets(bool has_AI);
     void setSoccerTarget(bool time_limit);

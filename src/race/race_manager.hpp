@@ -250,6 +250,10 @@ private:
     bool m_started_from_overworld;
 
 public:
+
+    int m_number_of_rule_files;
+    void setNumberOfRuleFiles(int x) { m_number_of_rule_files = x; };
+    int getNumberOfRuleFiles() { return m_number_of_rule_files; };
     ItemPolicy m_item_policy;
     void setItemPolicy(std::string str); 
     ItemPolicy *getItemPolicy() { return &m_item_policy; };

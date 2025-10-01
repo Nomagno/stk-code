@@ -108,6 +108,7 @@ class TrackInfoScreen : public GUIEngine::Screen,
     irr::gui::STKModifiedSpriteBank* m_icon_bank;
     
     int m_icon_unknown_kart;
+    int m_number_of_rule_files;
 
     std::vector<std::string> m_rule_files;
     void buildRulesFileListAndSpinner();
@@ -120,6 +121,7 @@ public:
     TrackInfoScreen();
     virtual ~TrackInfoScreen();
 
+    virtual void onUpdate(float dt) OVERRIDE;
     virtual void init() OVERRIDE;
     virtual void beforeAddingWidget() OVERRIDE;
     virtual void loadedFromFile() OVERRIDE;

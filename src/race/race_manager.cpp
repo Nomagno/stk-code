@@ -152,6 +152,7 @@ RaceManager::RaceManager()
     m_default_ai_list.clear();
     setNumPlayers(0);
     setSpareTireKartNum(0);
+    m_number_of_rule_files = 0;
     setItemPolicy("normal");
 }   // RaceManager
 

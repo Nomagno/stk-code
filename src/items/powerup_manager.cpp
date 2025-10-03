@@ -39,6 +39,14 @@
 
 PowerupManager* powerup_manager = nullptr;
 
+const std::string PowerupManager::powerup_names[14] = {
+        "nothing",            /* Nothing */
+        "bubblegum", "cake", "bowling", "zipper", "plunger", "switch",
+        "swatter", "rubber-ball", "parachute", "nitro-hack", "electro-shield",
+        "mini-wish", "anchor"
+};
+
+
 //-----------------------------------------------------------------------------
 /** The constructor initialises everything to zero. */
 PowerupManager::PowerupManager()

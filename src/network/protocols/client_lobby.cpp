@@ -1722,6 +1722,7 @@ void ClientLobby::handleClientCommand(const std::string& cmd)
             const std::string& language = UserConfigParams::m_language;
             cmd_ns->addUInt8(LE_COMMAND).encodeString(language).encodeString("itempolicy " + policy);
             Comm::sendToServer(cmd_ns, PRM_RELIABLE);
+            RaceManager::get()->setItemPolicy(policy);
             delete cmd_ns;
         }
     }

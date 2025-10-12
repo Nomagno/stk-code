@@ -313,7 +313,6 @@ void ItemPolicyDialog::computePolicyFromGUI() {
     SETRULE(CHECKBOX("forbid-bananas")->getState(), IPT_FORBID_BANANA);
     SETRULE(CHECKBOX("forbid-gifts")->getState(), IPT_FORBID_BONUSBOX);
     SETRULE(CHECKBOX("forbid-nitro")->getState(), IPT_FORBID_NITRO);
-    SETRULE(CHECKBOX("joker-laps-override")->getState(), IPT_JOKER_OVERRIDE);
 
     READ_TEXTBOX_FLOAT(cs->m_virtual_pace_gaps, "pace-car-intervals");
 
@@ -401,8 +400,6 @@ void ItemPolicyDialog::setGUIFromPolicy(){
     SET_CHECKBOX_RULE("forbid-bananas", IPT_FORBID_BANANA);
     SET_CHECKBOX_RULE("forbid-gifts", IPT_FORBID_BONUSBOX);
     SET_CHECKBOX_RULE("forbid-nitro", IPT_FORBID_NITRO);
-    SET_CHECKBOX_RULE("joker-laps-override", IPT_JOKER_OVERRIDE);
-    //TODO: joker laps override min and max spinners are useless rn
 
     SET_TEXTBOX_FLOAT(cs->m_virtual_pace_gaps, "pace-car-intervals");
 
@@ -491,13 +488,6 @@ void ItemPolicyDialog::setVisibilityOfRulesTab(bool visible) {
 
     LABEL("forbid-nitro")->setVisible(visible);
     CHECKBOX("forbid-nitro")->setVisible(visible);
-
-    LABEL("joker-laps-override")->setVisible(visible);
-    CHECKBOX("joker-laps-override")->setVisible(visible);
-
-    LABEL("joker-laps-min-max")->setVisible(visible);
-    SPINNER("joker-laps-min")->setVisible(visible);
-    SPINNER("joker-laps-max")->setVisible(visible);
 }
 
 void ItemPolicyDialog::setVisibilityOfTBDTab(bool visible) {

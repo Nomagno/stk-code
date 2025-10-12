@@ -194,17 +194,6 @@
                         <label id="forbid-nitro-label" proportion="9" text="Forbid nitro" text_align="left" />
                         <checkbox id="forbid-nitro-checkbox" proportion="1" />
                     </div>
-
-                    <div width="90%" height="fit" layout="horizontal-row">
-                        <label id="joker-laps-override-label" proportion="9" text="Joker laps override" text_align="left" />
-                        <checkbox id="joker-laps-override-checkbox" proportion="1" />
-                    </div>
-
-                    <div width="90%" height="fit" layout="horizontal-row">
-                        <label id="joker-laps-min-max-label" proportion="3" text="Joker laps min/max (WIP USELESS)" text_align="left" />
-                        <spinner id="joker-laps-min-spinner" proportion="3" wrap_around="false" />
-                        <spinner id="joker-laps-max-spinner" proportion="3" wrap_around="false" />
-                    </div>
             </div>
 
 

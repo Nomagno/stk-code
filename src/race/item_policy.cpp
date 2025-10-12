@@ -293,7 +293,6 @@ void ItemPolicy::fromString(std::string& input)
         retrieve_float(tmp.m_items_per_lap);
         retrieve_float(tmp.m_progressive_cap);
         retrieve_float(tmp.m_virtual_pace_gaps);
-        retrieve_float(tmp.m_tyre_change_time);
 
         unsigned item_vector_length = 0;
         retrieve_uint(item_vector_length);
@@ -336,7 +335,6 @@ std::string ItemPolicy::toString()
         ss << m_policy_sections[i].m_items_per_lap << " ";
         ss << m_policy_sections[i].m_progressive_cap << " ";
         ss << m_policy_sections[i].m_virtual_pace_gaps << " ";
-        ss << m_policy_sections[i].m_tyre_change_time << " ";
         ss << m_policy_sections[i].m_possible_types.size() << " ";
         for (unsigned j = 0; j < m_policy_sections[i].m_possible_types.size(); j++)
         {

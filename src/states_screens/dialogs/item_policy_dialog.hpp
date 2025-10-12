@@ -62,7 +62,7 @@ private:
     void setVisibilityOfPowerupTab(bool visible);
     void setVisibilityOfPowerupPoolTab(bool visible);
     void setVisibilityOfRulesTab(bool visible);
-    void setVisibilityOfFuelAndTyresTab(bool visible);
+    void setVisibilityOfTBDTab(bool visible);
     void updateMoreOption(int game_mode);
 public:
     ItemPolicyDialog(std::string path);

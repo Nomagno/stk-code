@@ -155,7 +155,7 @@ void ItemPolicyDialog::init()
     m_config_mode_spinner->addLabel(_("Powerups"));
     m_config_mode_spinner->addLabel(_("Powerup pool"));
     m_config_mode_spinner->addLabel(_("Rules"));
-    m_config_mode_spinner->addLabel(_("Fuel & Tyres"));
+    m_config_mode_spinner->addLabel(_("TBD"));
 
     m_config_mode_spinner->setValue(0);
     m_current_section_spinner->setValue(0);
@@ -191,7 +191,6 @@ GUIEngine::EventPropagation
         last->m_items_per_lap = 0.0f;
         last->m_progressive_cap = 0.0f;
         last->m_virtual_pace_gaps = 0.0f;
-        last->m_tyre_change_time = 0.0f;
         last->m_possible_types.clear();
         last->m_weight_distribution.clear();
 
@@ -239,7 +238,7 @@ void ItemPolicyDialog::onUpdate(float dt) {
 
 // ----------------------------------------------------------------------------
 /**
- * Reconfigure GUI based on the itempolicy config mode (powerups/poweruppool/rules/fuelandtyres)
+ * Reconfigure GUI based on the itempolicy config mode (powerups/poweruppool/rules/TBD)
  */
 void ItemPolicyDialog::updateMoreOption(int config_mode)
 {
@@ -248,25 +247,25 @@ void ItemPolicyDialog::updateMoreOption(int config_mode)
             setVisibilityOfPowerupTab(true);
             setVisibilityOfPowerupPoolTab(false);
             setVisibilityOfRulesTab(false);
-            setVisibilityOfFuelAndTyresTab(false);
+            setVisibilityOfTBDTab(false);
             break;
         case 1:
             setVisibilityOfPowerupTab(false);
             setVisibilityOfPowerupPoolTab(true);
             setVisibilityOfRulesTab(false);
-            setVisibilityOfFuelAndTyresTab(false);
+            setVisibilityOfTBDTab(false);
             break;
         case 2:
             setVisibilityOfPowerupTab(false);
             setVisibilityOfPowerupPoolTab(false);
             setVisibilityOfRulesTab(true);
-            setVisibilityOfFuelAndTyresTab(false);
+            setVisibilityOfTBDTab(false);
             break;
         case 3:
             setVisibilityOfPowerupTab(false);
             setVisibilityOfPowerupPoolTab(false);
             setVisibilityOfRulesTab(false);
-            setVisibilityOfFuelAndTyresTab(true);
+            setVisibilityOfTBDTab(true);
             break;
         default:
             break;
@@ -317,9 +316,6 @@ void ItemPolicyDialog::computePolicyFromGUI() {
     SETRULE(CHECKBOX("joker-laps-override")->getState(), IPT_JOKER_OVERRIDE);
 
     READ_TEXTBOX_FLOAT(cs->m_virtual_pace_gaps, "pace-car-intervals");
-
-    SETRULE(CHECKBOX("tyre-change-override")->getState(), IPT_TYRE_CHANGE_TIME_OVERRIDE);
-    READ_TEXTBOX_FLOAT(cs->m_tyre_change_time, "tyre-change-override-val");
 
     // Simultaneously rebuild the item policy and set the dependent GUI elements to visible/invisible
     cs->m_possible_types.clear();
@@ -409,11 +405,6 @@ void ItemPolicyDialog::setGUIFromPolicy(){
     //TODO: joker laps override min and max spinners are useless rn
 
     SET_TEXTBOX_FLOAT(cs->m_virtual_pace_gaps, "pace-car-intervals");
-
-    // Currently this doesn't have the same "if disabled reset to 0 regardless of the previous value" as
-    // give-at-start and give-per-lap because it wasn't really designed that way, but it should. It's fine for now.
-    SET_CHECKBOX_RULE("tyre-change-override", IPT_TYRE_CHANGE_TIME_OVERRIDE);
-    SET_TEXTBOX_FLOAT(cs->m_tyre_change_time, "tyre-change-override-val");
 
     // Simultaneously rebuild the GUI and set the dependent GUI elements to visible/invisible
 
@@ -509,16 +500,6 @@ void ItemPolicyDialog::setVisibilityOfRulesTab(bool visible) {
     SPINNER("joker-laps-max")->setVisible(visible);
 }
 
-void ItemPolicyDialog::setVisibilityOfFuelAndTyresTab(bool visible) {
-    LABEL("deg-mult")->setVisible(visible);
-    TEXTBOX("deg-mult")->setVisible(visible);
-
-    LABEL("fuel-mult")->setVisible(visible);
-    TEXTBOX("fuel-mult")->setVisible(visible);
-
-    LABEL("tyre-change-override")->setVisible(visible);
-    CHECKBOX("tyre-change-override")->setVisible(visible);
-
-    LABEL("tyre-change-override-val")->setVisible(visible);
-    TEXTBOX("tyre-change-override-val")->setVisible(visible);
+void ItemPolicyDialog::setVisibilityOfTBDTab(bool visible) {
+    LABEL("TBD")->setVisible(visible);
 }

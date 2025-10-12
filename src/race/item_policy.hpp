@@ -91,9 +91,6 @@ enum ItemPolicyRules {
     // Provided weights for the powerup pool will be ignored, instead using automatic ones to try to attempt reasonable balance.
     IPT_AUTOMATIC_WEIGHTS =  1 << 14,
 
-    // Stop time for all non-fuel tire changers will be m_tyre_change_time instead of their regular one
-    IPT_TYRE_CHANGE_TIME_OVERRIDE =  1 << 15
-
 };
 
 enum ItemPolicySectionBase
@@ -118,7 +115,6 @@ struct ItemPolicySection {
     float m_items_per_lap;
     float m_progressive_cap;
     float m_virtual_pace_gaps;
-    float m_tyre_change_time;
 
     // Which items can be handed out
     std::vector<PowerupManager::PowerupType> m_possible_types;

@@ -161,7 +161,7 @@ private:
 public:
 
     // Must match the order of PowerupType in powerup_manager.hpp!!
-    const static std::string powerup_names[14];
+    const static std::string powerup_names[11];
 
     static PowerupType   getPowerupType(const std::string &name);
 

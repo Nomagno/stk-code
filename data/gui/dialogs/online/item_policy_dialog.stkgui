@@ -149,23 +149,7 @@
                         <spinner id="powerup-parachute-spinner" proportion="3" wrap_around="false" />
                         <label id="powerup-parachute-autorefreshed-label" proportion="3" text="....." text_align="left" />
                     </div>
-                    <div width="90%" height="fit" layout="horizontal-row">
-                        <label id="powerup-nitro-hack-label" proportion="3" text="nitro-hack" text_align="left" />
-                        <checkbox id="powerup-nitro-hack-checkbox" proportion="1" />
-                        <spinner id="powerup-nitro-hack-spinner" proportion="3" wrap_around="false" />
-                        <label id="powerup-nitro-hack-autorefreshed-label" proportion="3" text="....." text_align="left" />
-
-                        <label id="powerup-electro-shield-label" proportion="3" text="electro-shield" text_align="left" />
-                        <checkbox id="powerup-electro-shield-checkbox" proportion="1" />
-                        <spinner id="powerup-electro-shield-spinner" proportion="3" wrap_around="false" />
-                        <label id="powerup-electro-shield-autorefreshed-label" proportion="3" text="....." text_align="left" />
-                    </div>
-                    <div width="90%" height="fit" layout="horizontal-row">
-                        <label id="powerup-mini-wish-label" proportion="3" text="mini-wish" text_align="left" />
-                        <checkbox id="powerup-mini-wish-checkbox" proportion="1" />
-                        <spinner id="powerup-mini-wish-spinner" proportion="3" wrap_around="false" />
-                        <label id="powerup-mini-wish-autorefreshed-label" proportion="3" text="....." text_align="left" />
-
+                    <div width="45%" height="fit" layout="horizontal-row">
                         <label id="powerup-anchor-label" proportion="3" text="anchor" text_align="left" />
                         <checkbox id="powerup-anchor-checkbox" proportion="1" />
                         <spinner id="powerup-anchor-spinner" proportion="3" wrap_around="false" />
@@ -227,13 +211,7 @@
 
             <div x="10%" y="0" width="96%" height="96%" layout="vertical-row">
                     <div width="90%" height="fit" layout="horizontal-row">
-                        <label id="tyre-change-override-label" proportion="9" text="Tyre change time override?" text_align="left" />
-                        <checkbox id="tyre-change-override-checkbox" proportion="1" />
-                    </div>
-
-                    <div width="90%" height="fit" layout="horizontal-row">
-                        <label id="tyre-change-override-val-label" proportion="3" text="Tyre change override val:" text_align="left" />
-                        <textbox id="tyre-change-override-val-textbox" proportion="3" />
+                        <label id="TBD-label" proportion="3" text="This section is under construction" text_align="left" />
                     </div>
             </div>
             </div>

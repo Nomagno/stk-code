@@ -39,11 +39,10 @@
 
 PowerupManager* powerup_manager = nullptr;
 
-const std::string PowerupManager::powerup_names[14] = {
-        "nothing",            /* Nothing */
-        "bubblegum", "cake", "bowling", "zipper", "plunger", "switch",
-        "swatter", "rubber-ball", "parachute", "nitro-hack", "electro-shield",
-        "mini-wish", "anchor"
+const std::string PowerupManager::powerup_names[11] = {
+    "nothing",            /* Nothing */
+    "bubblegum", "cake", "bowling", "zipper", "plunger", "switch",
+    "swatter", "rubber-ball", "parachute", "anchor"
 };
 
 
@@ -102,13 +101,6 @@ void PowerupManager::unloadPowerups()
         m_all_icons[i]  = (Material*)nullptr;
     }
 }   // removeTextures
-
-// Must match the order of PowerupType in powerup_manager.hpp!!
-static const std::string powerup_names[] = {
-    "nothing",            /* Nothing */
-    "bubblegum", "cake", "bowling", "zipper", "plunger", "switch",
-    "swatter", "rubber-ball", "parachute", "anchor"
-};
 
 //-----------------------------------------------------------------------------
 /** Determines the powerup type for a given name.

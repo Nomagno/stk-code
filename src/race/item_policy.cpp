@@ -57,12 +57,9 @@ int ItemPolicy::selectItemFrom(const std::vector<PowerupManager::PowerupType>& t
     throw std::logic_error("No item selected from weighted list (this code path should be unreachable)");
 }   // selectItemFrom
 //-----------------------------------------------------------------------------
+void ItemPolicy::applySectionRules(ItemPolicySection &section, AbstractKart *kart, int next_section_start_laps, int current_lap, int current_time, int prev_lap_item_amount) {
+	powerup_manager->computeWeightsForRace(RaceManager::get()->getNumberOfKarts());
 
-void ItemPolicy::applySectionRules(
-        ItemPolicySection &section, AbstractKart *kart,
-        int next_section_start_laps, int current_lap,
-        int current_time, int prev_lap_item_amount)
-{
     if (section.m_section_type == IP_TIME_BASED)
     {
         Log::error("ItemPolicy", "Time-implemented item policy sections are not implemented yet");

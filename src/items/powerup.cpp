@@ -22,6 +22,7 @@
 #include "audio/sfx_manager.hpp"
 #include "config/player_manager.hpp"
 #include "config/stk_config.hpp"
+#include "race/item_policy.hpp"
 #include "items/attachment.hpp"
 #include "items/item_manager.hpp"
 #include "items/projectile_manager.hpp"

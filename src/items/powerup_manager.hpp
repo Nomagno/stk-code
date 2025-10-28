@@ -105,6 +105,7 @@ private:
         WeightsData() { m_num_karts = 0; }
         void reset();
         void readData(int num_karts, const XMLNode *node);
+        void setData(int num_karts, const std::vector<std::vector<int>> &weights);
         void interpolate(WeightsData *prev, WeightsData *next, int num_karts);
         void convertRankToSection(int rank, int *prev, int *next,
                                  float *weight);

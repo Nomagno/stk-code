@@ -697,9 +697,9 @@
         </characteristic>
         <characteristic name="monoposto">
             <suspension stiffness="*1" />
-            <turn radius="-100:6.2 -1:6.2 0:3.15 5:4.6 12:10.75 20:22 30:50 38:80 44:120"
+            <turn radius="-100:6.2 -1:6.2 0:3.15 5:4.6 12:10.75 20:22 30:45 38:73 44:110"
                   brake-multiplier="1.05" />
-            <engine power="*1.5" max-speed="*1.85"
+            <engine power="*1.5" max-speed="*1.80"
                     max-speed-reverse-ratio="*1" brake-factor="30" time-full-brake="0.35" />
             <gear switch-ratio="0.0876 0.2189 0.3940 0.6200 0.8757 4"
                   power-increase="1.8 1.5 1.3 1.2 1.1 1" />
@@ -714,7 +714,7 @@
             <friction kart-friction="0.0" slowdown-factor="2.6" drag-coefficient="5.0" drag-exponent="1.45" game-engine-speed-uncap="false"/>
             <trackzipperfactor value="0.0" />
             <explosion duration="*0.6" radius="*0.6" />
-            <nitro engine-force="*1.2" consumption="1" max="5" max-speed-increase="3" duration="0.1" min-burst="0.1" fade-out-time="0.8" />
+            <nitro engine-force="*1" consumption="1" max="5" max-speed-increase="2" duration="0.1" min-burst="0.1" fade-out-time="0.8" />
             <slipstream length="*0.9" max-speed-increase="2" add-power="150" collect-time="*1.1"
                    duration-factor="*0.6" fade-out-time="*1" />
             <parachute lbound-fraction="0.55" ubound-fraction="0.35" />

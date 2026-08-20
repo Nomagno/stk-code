@@ -1100,6 +1100,49 @@ void RaceGUI::drawEnergyMeter(int x, int y, const Kart *kart,
     offset.Y = (float)y-11.5f*scaling.Y;
 
 
+    if (kart->getDisplay() >= 1) {
+        gui::ScalableFont* font = GUIEngine::getHighresDigitFont();
+        int font_height = font->getDimension(L"XXX").Height;
+        int font_width = font->getDimension(L"XXX").Width;
+
+        font->setBlackBorder(true);
+        font->setScale(1.0f);
+        std::string upper_str = std::to_string((int)kart->getSpeed());
+        std::wstring widestr = std::wstring(upper_str.begin(), upper_str.end());
+        const wchar_t *upper_wide = widestr.c_str();
+
+        static video::SColor color = video::SColor(255, 255, 255, 255);
+        font->draw(upper_wide, core::rect<s32>((int)offset.X - font_width*2,
+                                                (int)offset.Y-gauge_height,
+                                                (int)offset.X + 1.5*font_height,
+                                                (int)offset.Y-gauge_height+1.5*font_height),
+                               color);
+
+        if (kart->getDisplay() >= 2) {
+            std::string upper_str = std::to_string((int)std::abs(kart->getTurnRadius()));
+            std::wstring widestr = std::wstring(upper_str.begin(), upper_str.end());
+            const wchar_t *upper_wide = widestr.c_str();
+
+            static video::SColor color = video::SColor(255, 255, 255, 255);
+            if (kart->getTurnRadius() <= -1000 || kart->getTurnRadius() >= 1000) {
+                font->draw(StringUtils::utf32ToWide({ 0x221E /*infinite sign*/ }), core::rect<s32>((int)offset.X - font_width*2,
+                                                        (int)offset.Y-gauge_height+1.5*font_height,
+                                                        (int)offset.X + 1.5*font_height,
+                                                        (int)offset.Y-gauge_height+3.0*font_height),
+                                        color);
+            } else {
+                font->draw(upper_wide, core::rect<s32>((int)offset.X - font_width*2,
+                                                        (int)offset.Y-gauge_height+1.5*font_height,
+                                                        (int)offset.X + 1.5*font_height,
+                                                        (int)offset.Y-gauge_height+3.0*font_height),
+                                        color);
+            }
+       }
+    } else {
+        
+    }
+
+
     // Background
     draw2DImage(m_gauge_empty, core::rect<s32>((int)offset.X,
                                                (int)offset.Y-gauge_height,

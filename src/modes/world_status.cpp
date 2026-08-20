@@ -241,6 +241,7 @@ void WorldStatus::updateTime(int ticks)
         case TRACK_INTRO_PHASE:
             m_auxiliary_ticks++;
 
+             /* // IN TME, THERE'S NO SUCH SKIP
             if (UserConfigParams::m_artist_debug_mode &&
                 !NetworkConfig::get()->isNetworking() &&
                 RaceManager::get()->getNumberOfKarts() -
@@ -249,6 +250,7 @@ void WorldStatus::updateTime(int ticks)
             {
                 m_auxiliary_ticks += 6;
             }
+            */
 
             if (!m_play_track_intro_sound)
             {
@@ -338,6 +340,7 @@ void WorldStatus::updateTime(int ticks)
 
             m_auxiliary_ticks++;
 
+             /* // IN TME, THERE'S NO SUCH SKIP
             // In artist debug mode, when without opponents, skip the
             // ready/set/go counter faster
             if (UserConfigParams::m_artist_debug_mode     &&
@@ -348,6 +351,7 @@ void WorldStatus::updateTime(int ticks)
             {
                 m_auxiliary_ticks += 6;
             }
+            */
 
             return;   // Do not increase time
         case SET_PHASE:
@@ -369,7 +373,8 @@ void WorldStatus::updateTime(int ticks)
 
                 // event
                 onGo();
-                // In artist debug mode, when without opponents,
+             /* // IN TME, THERE'S NO SUCH SKIP
+               // In artist debug mode, when without opponents,
                 // skip the ready/set/go counter faster
                 m_start_music_ticks =
                     UserConfigParams::m_artist_debug_mode &&
@@ -379,10 +384,13 @@ void WorldStatus::updateTime(int ticks)
                     RaceManager::get()->getTrackName() != "tutorial" ?
                     stk_config->time2Ticks(0.2f) :
                     stk_config->time2Ticks(1.0f);
+            */
+               m_start_music_ticks = stk_config->time2Ticks(1.0f);
             }
 
             m_auxiliary_ticks++;
 
+            /* // IN TME, THERE'S NO SUCH SKIP
             // In artist debug mode, when without opponents, 
             // skip the ready/set/go counter faster
             if (UserConfigParams::m_artist_debug_mode &&
@@ -393,6 +401,7 @@ void WorldStatus::updateTime(int ticks)
             {
                 m_auxiliary_ticks += 6;
             }
+            */
 
             return;   // Do not increase time
         case GO_PHASE:

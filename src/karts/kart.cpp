@@ -599,6 +599,9 @@ void Kart::reset()
     m_item_amount_last_lap = 0;
     m_item_type_last_lap = PowerupManager::POWERUP_NOTHING;
 
+    m_display_level = 0;
+    m_turn_radius_info = 0;
+
     m_prev_skid_control = KartControl::SC_NONE;
     m_last_used_powerup    = PowerupManager::POWERUP_NOTHING;
     m_race_position        = m_initial_position;
@@ -3388,6 +3391,7 @@ void Kart::updatePhysics(int ticks)
 
     m_vehicle->setSteeringValue(brake_mult*final_steering, 0);
     m_vehicle->setSteeringValue(brake_mult*final_steering, 1);
+    setTurnRadius(1.0f/asinf((brake_mult*final_steering)/m_kart_properties->getWheelBase()));
 
     if (skidding_sound && !m_skidding->isJumping())
     {

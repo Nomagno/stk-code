@@ -67,6 +67,8 @@ public:
                        KGFX_SKID3R,
                        KGFX_SKID0L,
                        KGFX_SKID0R,
+                       KGFX_BRAKEL,
+                       KGFX_BRAKER,
                        KGFX_EXHAUST1,
                        KGFX_EXHAUST2,
                        KGFX_COUNT};
@@ -130,6 +132,7 @@ public:
     void updateTerrain(const ParticleKind *pk);
     void update(float dt);
     void updateNitroGraphics(float f, bool isNitroHackOn);
+    void updateBrakeGraphics(float f, float s, float v);
     void updateSkidLight(unsigned int level);
     void getGFXStatus(int* nitro, bool* zipper,
                       int* skidding, bool* red_skidding, bool* purple_skidding) const;

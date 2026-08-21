@@ -3795,6 +3795,8 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
             else
                 f = f * (0.35f + 0.65f / m_kart_properties->getEngineTimeFullBrake());
 
+            m_kart_gfx->updateBrakeGraphics(f, m_controls.getSteer(), m_speed);
+
             float brake_factor = m_kart_properties->getEngineBrakeFactor() * f;
             // Setting 
             m_vehicle->setAllBrakes(brake_factor);
@@ -3827,6 +3829,8 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
         else if (m_vehicle->getWheelInfo(0).m_brake &&
             !World::getWorld()->isStartPhase())
             m_vehicle->setAllBrakes(0);        
+
+        m_kart_gfx->updateBrakeGraphics(0.0f, m_controls.getSteer(), m_speed);
     }
 
     engine_power = applyAirFriction(engine_power);

@@ -669,6 +669,10 @@ public:
      *  from the server information. */
     virtual void setSpeed(float s) { m_speed = s; }
 
+    float m_turn_radius_info;
+    virtual void setTurnRadius(float t) { m_turn_radius_info = t; }
+    virtual float getTurnRadius() const { return m_turn_radius_info; }
+
     // ========================================================================================
     // STEERING and skidding related functions
     // ----------------------------------------------------------------------------------------
@@ -777,6 +781,12 @@ public:
     // ----------------------------------------------------------------------------------------
     /** Sets a new powerup. */
     virtual void setPowerup (PowerupManager::PowerupType t, int n);
+    // ----------------------------------------------------------------------------------------
+    /** Sets the display level, 1 - just digital speedometer, 2 - speedometer AND turn radius gauge. */
+    unsigned m_display_level;
+    void setDisplay(unsigned level) { m_display_level = level; }
+    unsigned getDisplay() const { return m_display_level; }
+
     // ----------------------------------------------------------------------------------------
     /** Sets the last used powerup. */
     virtual void setLastUsedPowerup (PowerupManager::PowerupType t);

@@ -1151,8 +1151,14 @@ void SlipStream::updateSpeedIncrease()
         float speed_increase = kp->getSlipstreamMaxSpeedIncrease();
         float add_power = kp->getSlipstreamAddPower();
         int fade_out = STKConfig::get()->time2Ticks(kp->getSlipstreamFadeOutTime());
-        m_kart->instantSpeedIncrease(
-            MaxSpeed::MS_INCREASE_SLIPSTREAM, speed_increase,
-            speed_increase, add_power, m_speed_increase_duration, fade_out);
+        if (m_kart->getControls().getAccel() > 0.0f) {
+            m_kart->instantSpeedIncrease(
+                MaxSpeed::MS_INCREASE_SLIPSTREAM, speed_increase,
+                speed_increase, add_power, m_speed_increase_duration, fade_out);
+        } else {
+            m_kart->instantSpeedIncrease(
+                MaxSpeed::MS_INCREASE_SLIPSTREAM, speed_increase,
+                0, add_power, m_speed_increase_duration, fade_out);
+        }
     }
 }   // updateSpeedIncrease

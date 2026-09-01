@@ -121,6 +121,11 @@ KartGFX::KartGFX(const Kart *kart, bool is_day)
 
     Vec3 rear_nitro_center(0, kart->getKartHeight()*0.2f, -0.1f*length);
 
+    Vec3 front_left(kart->getWheelGraphicsPosition(1).getX(), 0.05f,
+                    kart->getWheelGraphicsPosition(1).getZ()-0.1f   );
+    Vec3 front_right(kart->getWheelGraphicsPosition(0).getX(), 0.05f,
+                    kart->getWheelGraphicsPosition(0).getZ()-0.1f   );
+
     // FIXME Used to match the emitter as seen in blender
     const Vec3 delta(0, 0, 0.6f);
     Vec3 rear_nitro_right = km->getNitroEmittersPositon(0) + delta;
@@ -146,6 +151,10 @@ KartGFX::KartGFX(const Kart *kart, bool is_day)
     addEffect(KGFX_SKID3R,      "skid3.xml",       rear_right,       true );
     addEffect(KGFX_SKID0L,      "skid0.xml",       rear_left,        true );
     addEffect(KGFX_SKID0R,      "skid0.xml",       rear_right,       true );
+
+    addEffect(KGFX_BRAKEL, "brake.xml", front_left, true);
+    addEffect(KGFX_BRAKER, "brake.xml", front_right, true);
+
     if (!kart->getKartModel()->getExhaustXML().empty())
     {
         const std::string& ex = kart->getKartModel()->getExhaustXML();
@@ -554,6 +563,66 @@ void KartGFX::updateNitroGraphics(float nitro_frac, bool isNitroHackOn)
     // Exhaust is always emitting
     setCreationRateRelative(KartGFX::KGFX_EXHAUST1, 1.0);
     setCreationRateRelative(KartGFX::KGFX_EXHAUST2, 1.0);
+#endif
+}  // updateGraphics
+
+// ----------------------------------------------------------------------------
+/** Updates brake dependent particle effects.
+ *  \param brake_frac brake fraction/
+ *  \param steer_frac steer fraction for assigning smoke to each wheel/
+ *  \param speed the kart's speed/
+ */
+void KartGFX::updateBrakeGraphics(float brake_frac, float steer_frac, float speed)
+{
+#ifndef SERVER_ONLY
+    if (GUIEngine::isNoGraphics())
+        return;
+
+    // Upate particle effects (creation rate, and emitter size
+    // depending on speed)
+    // --------------------------------------------------------
+    if (brake_frac > 0 && speed > 10.0f)
+    {
+        float disable_left=false, disable_right=false;
+        float left_brake_frac, right_brake_frac;
+        if (steer_frac < -0.1f) {
+            float local_steer_frac = -steer_frac;
+            left_brake_frac = brake_frac+local_steer_frac*0.5;
+            right_brake_frac = brake_frac-local_steer_frac;
+            if (right_brake_frac < 0.1)
+                right_brake_frac = 0.0;
+
+            if (local_steer_frac > 0.8f)
+                disable_right = true;
+        } else if (steer_frac > 0.1f) {
+            float local_steer_frac = steer_frac;
+            right_brake_frac = brake_frac+local_steer_frac*0.5;
+            left_brake_frac = brake_frac-local_steer_frac;
+            if (left_brake_frac < 0.1)
+                left_brake_frac = 0.0;
+
+            if (local_steer_frac > 0.8f)
+                disable_left = true;
+        } else {
+            left_brake_frac = brake_frac*0.5;
+            right_brake_frac = brake_frac*0.5;
+        }
+
+        if (disable_left) {
+            setCreationRateAbsolute(KartGFX::KGFX_BRAKEL, 0);
+        } else {
+            setCreationRateRelative(KartGFX::KGFX_BRAKEL, left_brake_frac);
+        }
+
+        if (disable_right) {
+            setCreationRateAbsolute(KartGFX::KGFX_BRAKER, 0);
+        } else {
+            setCreationRateRelative(KartGFX::KGFX_BRAKER, right_brake_frac);
+        }
+    } else {
+        setCreationRateAbsolute(KartGFX::KGFX_BRAKEL, 0);
+        setCreationRateAbsolute(KartGFX::KGFX_BRAKER, 0);
+    }
 #endif
 }  // updateGraphics
 

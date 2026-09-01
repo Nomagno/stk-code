@@ -151,6 +151,7 @@ enum DebugMenuCommand
     DEBUG_GUI_CAM_SIDE_OF_KART,
     DEBUG_GUI_CAM_INV_SIDE_OF_KART,
     DEBUG_GUI_CAM_FRONT_OF_KART,
+    DEBUG_GUI_EXTRA_SENSORS,
     DEBUG_GUI_CAM_NORMAL,
     DEBUG_GUI_CAM_SMOOTH,
     DEBUG_GUI_CAM_ATTACH,
@@ -192,6 +193,17 @@ void addPowerup(PowerupManager::PowerupType powerup, int amount)
     {
         Kart* kart = world->getLocalPlayerKart(i);
         kart->setPowerup(powerup, amount);
+    }
+}   // addPowerup
+
+void setDisplay(unsigned level)
+{
+    World* world = World::getWorld();
+    if (!world) return;
+    for(unsigned int i = 0; i < RaceManager::get()->getNumLocalPlayers(); i++)
+    {
+        Kart* kart = world->getLocalPlayerKart(i);
+        kart->setDisplay(level);
     }
 }   // addPowerup
 
@@ -767,6 +779,9 @@ bool handleContextMenuAction(s32 cmd_id)
         Camera::getActiveCamera()->setKart(World::getWorld()->getKart(kart_num));
         irr_driver->getDevice()->getCursorControl()->setVisible(true);
         break;
+    case DEBUG_GUI_EXTRA_SENSORS:
+        setDisplay(2);
+        break;
     case DEBUG_GUI_CAM_FREE:
     {
         Camera *camera = Camera::getActiveCamera();
@@ -1295,6 +1310,7 @@ bool onEvent(const SEvent &event)
             sub->addItem(L"Right side of kart view (Ctrl + F6)", DEBUG_GUI_CAM_SIDE_OF_KART);
             sub->addItem(L"Left side of kart view (Ctrl + F7)", DEBUG_GUI_CAM_INV_SIDE_OF_KART);
             sub->addItem(L"Front of kart view (Ctrl + F8)", DEBUG_GUI_CAM_FRONT_OF_KART);
+            sub->addItem(L"Show digital speed and turn radius (Ctrl + Insert)", DEBUG_GUI_EXTRA_SENSORS);
 
             sub->addSeparator();
             sub->addItem(L"Toggle smooth camera", DEBUG_GUI_CAM_SMOOTH);
@@ -1628,7 +1644,12 @@ void handleStaticAction(int key, int value, bool control_pressed, bool shift_pre
             }
             case IRR_KEY_INSERT:
             {
-                handleContextMenuAction(DEBUG_POWERUP_NITRO);
+                if (control_pressed)
+                {
+                    handleContextMenuAction(DEBUG_GUI_EXTRA_SENSORS);
+                } else {
+                    handleContextMenuAction(DEBUG_POWERUP_NITRO);
+                }
                 break;
             }
             case IRR_KEY_DELETE:

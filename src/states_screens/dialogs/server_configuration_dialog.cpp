@@ -292,7 +292,7 @@ void ServerConfigurationDialog::onUpdate(float t) {
         int curr = m_allowed_selection_spinner->getValue();
         // If the selection spinner changed, update the value spinner
         if (curr != prev) {
-            m_allowed_value_spinner->setValue(m_tyre_alloc[tyre_mapping[prev]-1]);
+            m_allowed_value_spinner->setValue(m_tyre_alloc[tyre_mapping[curr]-1]);
             m_previous_tyre_selection_value = curr;
         }
 

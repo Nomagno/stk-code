@@ -208,6 +208,11 @@
                         <label word_wrap="true" id="forbid-nitro-label" proportion="9" text="Forbid nitro?" text_align="left" />
                         <checkbox id="forbid-nitro-checkbox" proportion="1" />
                     </div>
+
+                    <div width="100%" height="fit" layout="horizontal-row">
+                        <label word_wrap="true" id="refill-nitro-label" proportion="18" text="Refill nitro every lap" text_align="left" />
+                        <checkbox id="refill-nitro-checkbox" proportion="1" />
+                    </div>
             </div>
 
 

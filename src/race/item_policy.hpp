@@ -90,7 +90,10 @@ enum ItemPolicyRules {
     IPT_TYRE_CHANGE_TIME_OVERRIDE =  1 << 15,
 
     // All karts are ghosted and can't be hit by bowls, 
-    IPT_GHOST_KARTS =  1 << 16
+    IPT_GHOST_KARTS =  1 << 16,
+
+    // Refill nitro each new lap
+    IPT_REFILL_NITRO =  1 << 17
 
 };
 

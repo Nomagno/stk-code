@@ -80,6 +80,15 @@ void ItemPolicy::applySectionRules(ItemPolicySection &section, Kart *kart, int n
 
     bool active_role = gradual_add || gradual_replenish;
 
+
+    bool refill_nitro = rules & ItemPolicyRules::IPT_REFILL_NITRO;
+
+    if (refill_nitro) {
+        // Add way too much nitro, but addEnergy caps it to the kart's max capacity
+        kart->addEnergy(1000.0, false);
+    }
+
+
     int amount_to_add = section_start
                                 ? section.m_items_per_lap
                                 : (prev_lap_item_amount - curr_item_amount);

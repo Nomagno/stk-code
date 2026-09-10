@@ -551,5 +551,11 @@
         <tyre-change compound="123" stop-time="5" id="tc0" x="435.279907" y="4.395494" z="-22.290684" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tc0" x="443.279297" y="4.744108" z="-22.342299" h="0.5"/>
     </addon_wide-view-mugello>
+    <addon_uss-demolition>
+        <tyre-change compound="2" stop-time="10" id="tc0" x="-51.353127" y="32.912205" z="175.181412" h="0.5"/>
+        <tyre-change compound="3" stop-time="10" id="tc0" x="-57.017170" y="32.912708" z="184.062622" h="0.5"/>
+        <tyre-change compound="4" stop-time="10" id="tc0" x="-62.780540" y="32.913204" z="193.099609" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tc0" x="-70.143661" y="32.913826" z="204.644928" h="0.5"/>
+    </addon_uss-demolition>
     <!-- More tracks go here -->
 </overlay>

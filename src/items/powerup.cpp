@@ -247,12 +247,15 @@ void Powerup::use()
         }
     case PowerupManager::POWERUP_SWATTER:
         {
-            // Instead of having the swatter attachment just replace the gum shield,
-            // ensure the gum is popped on the ground.
-            // DecreaseShieldTime would not work here because the new attachment
-            // would be set before the next attachment update.
-            if(m_kart->isGumShielded())
-                m_kart->getAttachment()->popGumShield();
+            // [TME] for gameplay balance reasons, it is better to have the swatter 'just replace the gum shield'
+            /*
+                // Instead of having the swatter attachment just replace the gum shield,
+                // ensure the gum is popped on the ground.
+                // DecreaseShieldTime would not work here because the new attachment
+                // would be set before the next attachment update.
+                if(m_kart->isGumShielded())
+                    m_kart->getAttachment()->popGumShield();
+            */
             m_kart->getAttachment()->set(Attachment::ATTACH_SWATTER,
                 stk_config->time2Ticks(kp->getSwatterDuration()));
             break;

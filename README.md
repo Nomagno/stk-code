@@ -61,7 +61,7 @@ Currently, TME is a hard fork. It stopped tracking any other STK fork months ago
 
 - Item policy is a way of specifying rules that changed over the course of the race.
 - Offline, before clicking on the button to start the race, there is a spinner that allows you to select the current item policy file. You can also create a new one and edit it. The GUI is decently intuitive, just know that the first section MUST start at lap 0.
-- In servers, it can be changed from a stored config with `/itempolicypreset <name of config>` when in admin mode (activate with `/power tyre`).
+- In servers, it can be changed from a stored config with `/itempolicypreset <name of config>` when in admin mode (activate with `/power tme` or, for maximum permissions, `/power2 tme2`. Please change your `server.xml` passwords for the `/power` and `/power2` commands before hosting a public server xD).
 - Major feature list (there's a few more not described here):
     - Every single one of these described features can change over the course of the race. A race is divided into 'sections', each lasting from the section's lap number to the start of the next section. Example: `section 0 starts at lap 0, section 1 starts at lap 5. So section 0 lasts from lap 0 to lap 4, and section 1 lasts from lap 5 to the end of the race`.
     - Ghost mode (if at the start of the race, all players start from the same grid slot): when active, players can not interact with each other physically nor hit each other. They can still collect items, but any items they collect will not despawn (so the person in front doesn't 'steal' nitro bottles from the person behind).

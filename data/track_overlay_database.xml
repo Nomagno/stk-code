@@ -557,5 +557,11 @@
         <tyre-change compound="4" stop-time="10" id="tc0" x="-62.780540" y="32.913204" z="193.099609" h="0.5"/>
         <tyre-change compound="123" stop-time="5" id="tc0" x="-70.143661" y="32.913826" z="204.644928" h="0.5"/>
     </addon_uss-demolition>
+    <addon_forza-moderna>
+        <tyre-change compound="2" stop-time="25" id="tc0" x="-291.296997" y="2.737706" z="-799.009888" h="0.5"/>
+        <tyre-change compound="3" stop-time="25" id="tc1" x="-299.721222" y="2.738751" z="-799.426453" h="0.5"/>
+        <tyre-change compound="4" stop-time="25" id="tc2" x="-308.826965" y="2.739842" z="-799.876709" h="0.5"/>
+        <tyre-change compound="123" stop-time="5" id="tcf" x="-318.324402" y="2.740937" z="-800.346436" h="0.5"/>
+    </addon_forza-moderna>
     <!-- More tracks go here -->
 </overlay>

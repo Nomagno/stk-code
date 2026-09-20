@@ -75,7 +75,12 @@
         </div>
     </div>
 
-    <div x="0" y="0" width="100%" height="fit" layout="vertical-row">
+    <div x="0" y="0" width="100%" height="fit" layout="horizontal-row">
+        <label proportion="3" height="100%" id="version"
+            I18N="In the main screen"
+            text=""
+            align="left" text_align="left" />
+
         <button id="user-id" width="12f" height="fit" align="right"/>
     </div>
 </stkgui>

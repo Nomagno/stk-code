@@ -325,6 +325,7 @@ void ItemPolicyDialog::computePolicyFromGUI() {
     SETRULE(CHECKBOX("pace-car")->getState(), IPT_VIRTUAL_PACE);
     SETRULE(CHECKBOX("pace-car-unlap")->getState(), IPT_UNLAPPING);
 
+    SETRULE(CHECKBOX("refill-nitro")->getState(), IPT_REFILL_NITRO);
     SETRULE(CHECKBOX("forbid-bananas")->getState(), IPT_FORBID_BANANA);
     SETRULE(CHECKBOX("forbid-gifts")->getState(), IPT_FORBID_BONUSBOX);
     SETRULE(CHECKBOX("forbid-nitro")->getState(), IPT_FORBID_NITRO);
@@ -434,6 +435,7 @@ void ItemPolicyDialog::setGUIFromPolicy(){
     SET_CHECKBOX_RULE("pace-car", IPT_VIRTUAL_PACE);
     SET_CHECKBOX_RULE("pace-car-unlap", IPT_UNLAPPING);
 
+    SET_CHECKBOX_RULE("refill-nitro", IPT_REFILL_NITRO);
     SET_CHECKBOX_RULE("forbid-bananas", IPT_FORBID_BANANA);
     SET_CHECKBOX_RULE("forbid-gifts", IPT_FORBID_BONUSBOX);
     SET_CHECKBOX_RULE("forbid-nitro", IPT_FORBID_NITRO);
@@ -533,6 +535,9 @@ void ItemPolicyDialog::setVisibilityOfRulesTab(bool visible) {
 
     LABEL("pace-car-intervals")->setVisible(visible);
     TEXTBOX("pace-car-intervals")->setVisible(visible);
+
+    LABEL("refill-nitro")->setVisible(visible);
+    CHECKBOX("refill-nitro")->setVisible(visible);
 
     LABEL("forbid-bananas")->setVisible(visible);
     CHECKBOX("forbid-bananas")->setVisible(visible);

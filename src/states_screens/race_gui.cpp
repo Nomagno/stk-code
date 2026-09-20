@@ -532,11 +532,11 @@ void RaceGUI::drawCompoundData(const Kart* kart,
     
 #ifndef SERVER_ONLY
     if(has_degradation) GL32_draw2DRectangle(color_base, pos_bars_outer[0]);
-    if(has_degradation) GL32_draw2DRectangle(color_base, pos_bars_outer[1]);
+    //if(has_degradation) GL32_draw2DRectangle(color_base, pos_bars_outer[1]);
     if(has_fuel) GL32_draw2DRectangle(color_base, pos_bars_outer[2]);
 
     if(has_degradation) GL32_draw2DRectangle(color_traction, pos_bars_inner[0]);
-    if(has_degradation) GL32_draw2DRectangle(color_turning, pos_bars_inner[1]);
+    //if(has_degradation) GL32_draw2DRectangle(color_turning, pos_bars_inner[1]);
     if(has_fuel) GL32_draw2DRectangle(color_fuel, pos_bars_inner[2]);
 #endif
 
@@ -627,7 +627,7 @@ void RaceGUI::drawCompoundData(const Kart* kart,
 
     //Precision originally 1
     stream_percent_traction << std::fixed << std::setprecision(1) << 100.0f*currlives[0]/maxLives[0] << "%";
-    stream_percent_turning << std::fixed << std::setprecision(1) << 100.0f*currlives[1]/maxLives[1] << "%";
+    stream_percent_turning << "(" << std::fixed << std::setprecision(1) << 100.0f*currlives[1]/maxLives[1] << "%" << ")" ;
 
     if (kart->m_is_refueling)
         stream_percent_fuel << "+";

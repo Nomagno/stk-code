@@ -67,6 +67,7 @@
 #include "tracks/track.hpp"
 #include "utils/string_utils.hpp"
 #include "utils/translation.hpp"
+#include "utils/version.hpp"
 #include "main_loop.hpp"
 
 #include <string>
@@ -249,6 +250,9 @@ void MainMenuScreen::init()
     r->setFocusForPlayer(PLAYER_ID_GAME_MASTER);
     DemoWorld::resetIdleTime();
 
+    LabelWidget *version = getWidget<LabelWidget>("version");
+    version->setText(StringUtils::toWString("Version " + Version::version()), true /*expand_if_needed*/);
+
 #ifdef IOS_STK
     // iOS app doesn't like quit button in UI
     Widget* quit = getWidget("quit");
@@ -349,6 +353,7 @@ void MainMenuScreen::onUpdate(float delta)
     if (SDL_IsAndroidTV())
         return;
 #endif
+
 
     player->incrementUseFrequency();
     class PlayTutorial :

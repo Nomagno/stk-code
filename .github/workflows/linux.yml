@@ -47,31 +47,27 @@ jobs:
         if: ${{ github.ref == 'refs/heads/tyre2X' }}
         run: |
           echo "release_tag=git`date +%Y%m%d`" >> $GITHUB_ENV
-          echo "release_name=preview" >> $GITHUB_ENV
       - name: Configure packaging name for tag
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         run: |
-          echo "release_tag=`basename $GITHUB_REF`" >> $GITHUB_ENV
-          echo "release_name=`basename $GITHUB_REF`" >> $GITHUB_ENV
+          echo "release_tag=git`date +%Y%m%d`" >> $GITHUB_ENV
       - name: Configure packaging name for non-releasing branch
         if: ${{ !(github.ref == 'refs/heads/tyre2X' || startsWith(github.ref, 'refs/tags/')) }}
         run: |
-          echo "release_tag=" >> $GITHUB_ENV
-          echo "release_name=" >> $GITHUB_ENV
+          echo "release_tag=git`date +%Y%m%d`" >> $GITHUB_ENV
       - name: Affirm_non-prerelease
         run: |
           echo "release_pre=false" >> $GITHUB_ENV
       - name: Show packaging name
         run : |
           echo "${{ env.release_tag }}"
-          echo "${{ env.release_name }}"
           echo "${{ env.release_pre }}"
       - name: Install linux dependencies
         run: |
           sudo apt-get update 
           sudo apt install -y build-essential cmake libbluetooth-dev libcurl4-gnutls-dev \
           libfreetype6-dev libharfbuzz-dev libjpeg-dev libogg-dev libopenal-dev \
-          libpng-dev libsdl2-dev libvorbis-dev pkg-config zlib1g-dev clang
+          libpng-dev libsdl2-dev libvorbis-dev pkg-config zlib1g-dev chrpath
           git clone https://github.com/Nomagno/stk-assets
           mv stk-assets ..
       - name: Set compiler (gcc)

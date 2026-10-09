@@ -91,7 +91,7 @@ jobs:
       - name: Build and install
         working-directory: build
         run: |
-          make -j3 VERBOSE=1
+          make -j8 VERBOSE=1
           cd ..
           mv build build-linux-x86_64
           tools/linus_builder.sh

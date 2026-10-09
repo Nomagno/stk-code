@@ -5,44 +5,7 @@
 #
 
 # This is a build script that creates STK linux package.
-#
-# To run the script you need debootstrap and schroot packages, and working
-# chroot environment.
-#
-# The build environment can be created using debootstrap:
-#
-#   debootstrap --arch i386 --components=main \
-#               jessie ./chroot-jessie32 http://ftp.debian.org/debian
-#
-#   debootstrap --arch amd64 --components=main \
-#               jessie ./chroot-jessie64 http://ftp.debian.org/debian
-#
-#
-# Here is example configuration for schroot:
-# /etc/schroot/chroot.d/chroot-jessie32.conf
-#
-#   [chroot-jessie32]
-#   description=Debian Jessie
-#   personality=linux32
-#   directory=/path/to/chroot-jessie32
-#   root-users=deve
-#   type=directory
-#   users=deve
-#
-#
-# /etc/schroot/chroot.d/chroot-jessie64.conf
-#
-#   [chroot-jessie64]
-#   description=Debian Jessie 64-bit
-#   #personality=linux32
-#   directory=/path/to/chroot-jessie64
-#   root-users=deve
-#   type=directory
-#   users=deve
-#
-#
-# Packages that are needed to compile all STK dependencies have to be installed
-# manually inside both chroot directories.
+
       
 
 export DIRNAME="$(dirname "$(readlink -f "$0")")"
@@ -51,14 +14,9 @@ export DIRNAME="$(dirname "$(readlink -f "$0")")"
 
 export STK_VERSION="git`date +%Y%m%d`"
 export THREADS_NUMBER=`nproc`
-export SCHROOT_32BIT_NAME="chroot-buster32"
-export SCHROOT_64BIT_NAME="chroot-buster64"
-export SCHROOT_ARMV7_NAME="chroot-buster-armhf"
-export SCHROOT_ARM64_NAME="chroot-buster-arm64"
-export SCHROOT_RISCV_NAME="chroot-trixie-riscv64"
 
 export STKCODE_DIR="$DIRNAME/.."
-export STKASSETS_DIR="$STKCODE_DIR/../supertuxkart-assets"
+export STKASSETS_DIR="$STKCODE_DIR/../stk-assets"
 export OPENGLRECORDER_DIR="$STKCODE_DIR/../libopenglrecorder"
 export STKEDITOR_DIR="$STKCODE_DIR/../supertuxkart-editor"
 
@@ -680,16 +638,14 @@ test_package()
 
 create_package()
 {
-    SCHROOT_NAME="$1"
-    ARCH="$2"
-    BINARY_ARCH="$3"
+    ARCH="$1"
+    BINARY_ARCH="$2"
     
     echo "Building $ARCH version..."
     
-    schroot -c $SCHROOT_NAME -- "$0" build_stk "$ARCH" "-DDEBUG_SYMBOLS=1"
     
     if [ ! -f "$STKCODE_DIR/$BUILD_DIR-$ARCH/bin/supertuxkart" ]; then
-        echo "Couldn't build $ARCH version."
+        echo "Couldn't build $ARCH version." "$STKCODE_DIR/$BUILD_DIR-$ARCH/bin/supertuxkart"
         exit 1
     fi
     
@@ -705,7 +661,6 @@ create_package()
     mkdir -p "$STK_PACKAGE_DIR/bin"
     mkdir -p "$STK_PACKAGE_DIR/lib"
     
-    schroot -c $SCHROOT_NAME -- "$0" copy_libraries "$ARCH" "$STK_PACKAGE_DIR/lib"
     
     find "$STK_PACKAGE_DIR/lib" -type f -exec strip -s {} \;
     
@@ -731,7 +686,7 @@ create_package()
     cp -a "$STKASSETS_DIR/sfx" "$STK_PACKAGE_DIR/data/"
     cp -a "$STKASSETS_DIR/textures" "$STK_PACKAGE_DIR/data/"
     cp -a "$STKASSETS_DIR/tracks" "$STK_PACKAGE_DIR/data/"
-    cp -a "$STKASSETS_DIR/licenses.txt" "$STK_PACKAGE_DIR/data/"
+    cp -a "$STKASSETS_DIR/COPYING" "$STK_PACKAGE_DIR/data/"
     
     strip --strip-debug "$STK_PACKAGE_DIR/bin/supertuxkart"
     # strip --strip-debug "$STK_PACKAGE_DIR/bin/supertuxkart-editor"
@@ -744,7 +699,6 @@ create_package()
     find "$STK_PACKAGE_DIR/bin" -type f -exec chmod a+x {} \;
     chmod a+x "$STK_PACKAGE_DIR/run_game.sh"
     
-    schroot -c $SCHROOT_NAME -- "$0" test_package "$STK_PACKAGE_DIR" "$BINARY_ARCH"
     
     # Compress package
     
@@ -785,10 +739,10 @@ fi
 
 # Building STK
 
-create_package "$SCHROOT_32BIT_NAME" "x86" "elf32-i386"
-create_package "$SCHROOT_64BIT_NAME" "x86_64" "elf64-x86-64"
-create_package "$SCHROOT_ARMV7_NAME" "armv7" "elf32-littlearm"
-create_package "$SCHROOT_ARM64_NAME" "arm64" "elf64-littleaarch64"
-create_package "$SCHROOT_RISCV_NAME" "riscv64" "elf64-littleriscv"
+# create_package "x86" "elf32-i386"
+create_package "x86_64" "elf64-x86-64"
+# create_package "armv7" "elf32-littlearm"
+# create_package "arm64" "elf64-littleaarch64"
+# create_package "riscv64" "elf64-littleriscv"
 
 echo "Success."

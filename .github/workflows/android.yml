@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
         compiler: [gcc]
         build_type: [Beta]
     runs-on: ${{ matrix.os }}

@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04]
         compiler: [gcc, clang]
         build_type: [Debug, RelWithDebInfo, Release]
         server_only: [ON, OFF]
@@ -68,7 +68,7 @@ jobs:
           echo "${{ env.release_name }}"
           echo "${{ env.release_pre }}"
       - name: Install linux dependencies
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-24.04' }}
         run: |
           sudo apt-get update 
           sudo apt install -y build-essential cmake libbluetooth-dev libcurl4-gnutls-dev \
@@ -92,12 +92,12 @@ jobs:
           tar xf dependencies-mac.tar.xz -C /usr/local
           rm dependencies-mac.tar.xz
       - name: Set compiler (gcc)
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.compiler == 'gcc' }}
+        if: ${{ matrix.os == 'ubuntu-24.04' && matrix.compiler == 'gcc' }}
         run: |
           echo "CXX=g++" >> $GITHUB_ENV
           echo "CC=gcc" >> $GITHUB_ENV
       - name: Set compiler (clang)
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.compiler == 'clang' }}
+        if: ${{ matrix.os == 'ubuntu-24.04' && matrix.compiler == 'clang' }}
         run: |
           echo "CXX=clang++" >> $GITHUB_ENV
           echo "CC=clang" >> $GITHUB_ENV

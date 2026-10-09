@@ -94,7 +94,7 @@ jobs:
           make -j8 VERBOSE=1
           cd ..
           mv build build-linux-x86_64
-          tools/linus_builder.sh
+          tools/linux_builder.sh
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:

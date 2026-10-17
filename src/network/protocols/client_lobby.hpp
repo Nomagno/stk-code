@@ -72,6 +72,7 @@ private:
     void receivePlayerVote(Event* event);
     void updatePlayerList(Event* event);
     void handleChat(Event* event);
+    void handleKartSwitch(Event* event);
     void handleServerInfo(Event* event);
     void handleItemPolicy(Event* event);
     void reportSuccess(Event* event);

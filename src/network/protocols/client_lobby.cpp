@@ -228,6 +228,7 @@ bool ClientLobby::notifyEvent(Event* event)
         case LE_BAD_CONNECTION:        handleBadConnection();      break;
         case LE_LIVE_JOIN_ACK:        liveJoinAcknowledged(event); break;
         case LE_KART_INFO:             handleKartInfo(event);      break;
+        case LE_KART_SWITCH:           handleKartSwitch(event);    break;
         case LE_START_RACE:            startGame(event);           break;
         case LE_REPORT_PLAYER:         reportSuccess(event);       break;
         default:
@@ -1540,6 +1541,21 @@ void ClientLobby::handleKartInfo(Event* event)
     rki.setKartName(kart_name);
     rki.setCountryCode(country_code);
     rki.setKartData(kart_data);
+
+    Kart* k = World::getWorld()->getKart(kart_id);
+    k->changeKart(rki.getKartName(), rki.getHandicap(), rki.getStartingTyre(),
+        rki.getKartTeam() == KART_TEAM_RED ?
+        std::make_shared<GE::GERenderInfo>(1.0f) :
+        rki.getKartTeam() == KART_TEAM_BLUE ?
+        std::make_shared<GE::GERenderInfo>(0.66f) :
+        std::make_shared<GE::GERenderInfo>(rki.getDefaultKartColor()),
+        rki.getKartData());
+    k->setLiveJoinKart(live_join_util_ticks);
+    World::getWorld()->initTeamArrows(k);
+    if (!k->getController()->isLocalPlayerController())
+        k->setOnScreenText(rki.getPlayerName().c_str());
+
+
     addLiveJoiningKart(kart_id, rki, live_join_util_ticks);
 
     core::stringw msg;
@@ -1566,6 +1582,58 @@ void ClientLobby::handleKartInfo(Event* event)
     SFXManager::get()->quickSound("energy_bar_full");
     MessageQueue::add(MessageQueue::MT_FRIEND, msg);
 }   // handleKartInfo
+
+//-----------------------------------------------------------------------------
+void ClientLobby::handleKartSwitch(Event* event)
+{
+    World* w = World::getWorld();
+    if (!w)
+        return;
+    const NetworkString& data = event->data();
+    int live_join_util_ticks = data.getUInt32();
+    uint8_t kart_id = data.getUInt8();
+    core::stringw player_name;
+    data.decodeStringW(&player_name);
+    uint32_t host_id = data.getUInt32();
+    float kart_color = data.getFloat();
+    uint32_t online_id = data.getUInt32();
+    uint8_t h = (uint8_t)data.getUInt8();
+    uint8_t local_id = data.getUInt8();
+    std::string kart_name;
+    data.decodeString(&kart_name);
+    std::string country_code;
+    data.decodeString(&country_code);
+    KartData kart_data;
+    if (data.size() > 0)
+        kart_data = KartData(data);
+    if (kart_id >= RaceManager::get()->getNumPlayers() || kart_name.empty())
+        return;
+    RemoteKartInfo& rki = RaceManager::get()->getKartInfo(kart_id);
+    rki.setPlayerName(player_name);
+    rki.setHostId(host_id);
+    rki.setDefaultKartColor(kart_color);
+    rki.setOnlineId(online_id);
+    rki.setHandicap(h);
+    rki.setLocalPlayerId(local_id);
+    rki.setKartName(kart_name);
+    rki.setCountryCode(country_code);
+    rki.setKartData(kart_data);
+
+    Kart* k = World::getWorld()->getKart(kart_id);
+    k->changeKartMidRace(rki.getKartName(), rki.getHandicap(), rki.getStartingTyre(),
+        rki.getKartTeam() == KART_TEAM_RED ?
+        std::make_shared<GE::GERenderInfo>(1.0f) :
+        rki.getKartTeam() == KART_TEAM_BLUE ?
+        std::make_shared<GE::GERenderInfo>(0.66f) :
+        std::make_shared<GE::GERenderInfo>(rki.getDefaultKartColor()),
+        rki.getKartData());
+    k->setLiveJoinKart(live_join_util_ticks);
+    if (!k->getController()->isLocalPlayerController())
+        k->setOnScreenText(rki.getPlayerName().c_str());
+
+    addLiveJoiningKart(kart_id, rki, live_join_util_ticks);
+}   // handleKartSwitch
+
 
 //-----------------------------------------------------------------------------
 void ClientLobby::startLiveJoinKartSelection()

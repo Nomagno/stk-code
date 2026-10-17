@@ -4177,6 +4177,67 @@ void ServerLobby::setPlayerKarts(const NetworkString& ns, std::shared_ptr<STKPee
 }   // setPlayerKarts
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+/*! \brief Swaps a peer's kart mid-game, returns "" or an error string. */
+std::string ServerLobby::switchPlayerKart(std::shared_ptr<STKPeer> peer, const std::string& kart_name) {
+    World* w = World::getWorld();
+
+    if (kart_name.empty())
+        return "Empty kart name";
+
+    int kart_id = -1;
+    unsigned num = RaceManager::get()->getNumPlayers();
+    for (unsigned i = 0; i < num; i++) {
+        const RemoteKartInfo& r = RaceManager::get()->getKartInfo(i);
+        if (!r.isReserved() && r.getHostId() == peer->getHostId()) {
+            kart_id = (int)i;
+            break;
+        }
+    }
+    if (kart_id < 0) return "No active kart found.";
+    RemoteKartInfo& rki = RaceManager::get()->getKartInfo((unsigned)kart_id);
+    Kart* k = w->getKart((unsigned)kart_id);
+    if (!k || k->isEliminated()) return "Kart is not racing right now.";
+
+    const KartProperties* kp = kart_properties_manager->getKart(kart_name);
+
+    if (!kp)
+        return std::string("Unknown kart: ") + kart_name;
+
+    int local_id = rki.getLocalPlayerId();
+    if (local_id < 0 ||
+        local_id >= (int)peer->getPlayerProfiles().size())
+        return "No active kart found.";
+
+    peer->getPlayerProfiles()[(unsigned)local_id]->setKartName(kart_name);
+    KartData kart_data(kp);
+    rki.setKartName(kart_name);
+    rki.setKartData(kart_data);
+    btTransform switch_transform = k->getBody()->getWorldTransform();
+    addLiveJoiningKart(kart_id, rki, 0);
+
+    k->getBody()->setCenterOfMassTransform(switch_transform);
+    k->setTrans(switch_transform);
+
+    Log::info("ServerLobby", "Kart %d switched to %s.", kart_id,
+        kart_name.c_str());
+
+    NetworkString* silent = getNetworkString(1);
+    silent->setSynchronous(true);
+    silent->addUInt8(LE_KART_SWITCH).addUInt32(0).addUInt8((uint8_t)kart_id)
+        .encodeString(rki.getPlayerName())
+        .addUInt32(rki.getHostId()).addFloat(rki.getDefaultKartColor())
+        .addUInt32(rki.getOnlineId()).addUInt8(rki.getHandicap())
+        .addUInt8((uint8_t)rki.getLocalPlayerId())
+        .encodeString(rki.getKartName()).encodeString(rki.getCountryCode());
+    rki.getKartData().encode(silent);
+    Comm::sendMessageToPeers(silent, PRM_RELIABLE);
+    delete silent;
+    return "";
+}   // switchPlayerKart
+
+
+//-----------------------------------------------------------------------------
 /** Tell the client \ref RemoteKartInfo of a player when some player joining
  *  live.
  */

@@ -291,6 +291,7 @@ private:
     bool supportsAI();
 public:
     void changeLimitForTournament(bool goal_target);
+    std::string switchPlayerKart(std::shared_ptr<STKPeer> peer, const std::string& kart_name);
 private:
     bool canVote(std::shared_ptr<STKPeer> peer) const;
     bool hasHostRights(std::shared_ptr<STKPeer> peer) const;

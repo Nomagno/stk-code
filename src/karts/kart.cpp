@@ -72,7 +72,9 @@
 #include "modes/soccer_world.hpp"
 #include "network/compress_network_body.hpp"
 #include "network/network_config.hpp"
+#include "network/stk_host.hpp"
 #include "network/protocols/client_lobby.hpp"
+#include "network/protocols/server_lobby.hpp"
 #include "network/race_event_manager.hpp"
 #include "network/rewind_info.hpp"
 #include "network/rewind_manager.hpp"
@@ -408,6 +410,15 @@ void Kart::changeKartMidRace(const std::string& new_ident,
                       std::shared_ptr<GE::GERenderInfo> ri,
                       const KartData& kart_data)
 {
+    if (NetworkConfig::get()->isServer()) {
+        // As server, send kart change packets for others to sync
+        auto sl = LobbyProtocol::get<ServerLobby>();
+        irr::core::stringw string_bcf_sucks = getController()->getName();
+        auto peer = STKHost::get()->findPeerByName(string_bcf_sucks);
+        sl->switchPlayerKart(peer, new_ident);
+        return;
+    }
+
     // Save vital state
     unsigned co = m_tyres->m_current_compound;
     float l_tra = m_tyres->m_current_life_traction;
@@ -424,6 +435,7 @@ void Kart::changeKartMidRace(const std::string& new_ident,
     float accel = m_controls.getAccel();
     float nitro = m_collected_energy;
     int pit_slowdown_ticks = m_max_speed->getSpeedDecreaseTicksLeft(MaxSpeed::MS_DECREASE_STOP);
+
 
 
     changeKart(new_ident, handicap, starting_tyre, ri, kart_data);

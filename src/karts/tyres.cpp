@@ -565,7 +565,21 @@ void Tyres::commandChange(int compound, int time) {
             m_kart->m_max_speed->setSlowdown(MaxSpeed::MS_DECREASE_STOP, m_kart->getKartProperties()->getTyresPitSpeedFraction(), stk_config->time2Ticks(0.1f), stk_config->time2Ticks(time));
         }
 
-        m_kart->changeKartMidRace(kart_to_change_to, m_kart->getHandicap(), m_current_compound /*will be ignored*/, m_kart->getKartModel()->getRenderInfo());
+        if (!(NetworkConfig::get()->isNetworking()))
+        {
+            m_kart->changeKartMidRace(kart_to_change_to,
+                                      m_kart->getHandicap(),
+                                      m_current_compound /*will be ignored*/,
+                                      m_kart->getKartModel()->getRenderInfo());
+        } else if (NetworkConfig::get()->isServer()) {
+            // When networking, only the server has to perform the kart change
+            // The client will sync it
+            m_kart->changeKartMidRace(kart_to_change_to,
+                                      m_kart->getHandicap(),
+                                      m_current_compound /*will be ignored*/,
+                                      m_kart->getKartModel()->getRenderInfo());
+        }
+
         return;
     }
 

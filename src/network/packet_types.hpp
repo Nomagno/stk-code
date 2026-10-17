@@ -69,6 +69,7 @@ enum LobbyEvent: uint8_t
                         // (like abusive behaviour)
     LE_ASSETS_UPDATE, // Client tell server with updated assets
     LE_COMMAND, // Command
+    LE_KART_SWITCH // Kart swap
 };
 
 enum RejectReason : uint8_t

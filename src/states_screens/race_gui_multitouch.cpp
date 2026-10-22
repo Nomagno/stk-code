@@ -165,7 +165,7 @@ void RaceGUIMultitouch::init()
 
     auto cl = LobbyProtocol::get<ClientLobby>();
     
-    if (cl && cl->isSpectator())
+    if (UserConfigParams::m_ai_tv_mode || (cl && cl->isSpectator()))
     {
         createSpectatorGUI();
         m_is_spectator_mode = true;

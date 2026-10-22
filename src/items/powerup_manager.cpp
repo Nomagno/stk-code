@@ -905,7 +905,10 @@ void PowerupManager::computeWeightsForRace(int num_karts, BareNetworkString *ns)
         m_current_item_weights.reset();
         WeightsData *newweight = new WeightsData();
         m_current_item_weights = *newweight;
-        m_current_item_weights.m_powerup_order = m_sorted_race_weights;
+
+        // Do not use sorted race weights for itempolicy stuff
+        // m_current_item_weights.m_powerup_order = m_sorted_race_weights;
+
         std::vector<std::vector<int>> weights;
         weights.emplace_back();
         weights[0].clear();

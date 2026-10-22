@@ -3132,6 +3132,14 @@ void SkiddingAI::setSteering(float angle)
 {
     float steer_fraction = angle / m_kart->getMaxSteerAngle();
 
+    // TODO: 
+    // CalculateSteeringAsIfNoob()
+    // If (canSkid)
+    //   calculateSteeringWhenSkiddingForSteerLikeNoob()
+    // Else
+    //   steerLikeNoob()
+
+
     // Use a simple finite state machine to make sure to randomly decide
     // whether to skid or not only once per skid section. See docs for
     // m_skid_probability_state for more details.

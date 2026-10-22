@@ -611,12 +611,16 @@ void KartGFX::updateBrakeGraphics(float brake_frac, float steer_frac, float spee
         if (disable_left) {
             setCreationRateAbsolute(KartGFX::KGFX_BRAKEL, 0);
         } else {
+            if (left_brake_frac > 1.0f)
+                left_brake_frac = 1.0f;
             setCreationRateRelative(KartGFX::KGFX_BRAKEL, left_brake_frac);
         }
 
         if (disable_right) {
             setCreationRateAbsolute(KartGFX::KGFX_BRAKER, 0);
         } else {
+            if (right_brake_frac > 1.0f)
+                right_brake_frac = 1.0f;
             setCreationRateRelative(KartGFX::KGFX_BRAKER, right_brake_frac);
         }
     } else {

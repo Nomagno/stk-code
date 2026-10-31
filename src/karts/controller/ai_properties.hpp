@@ -45,6 +45,8 @@ protected:
     friend class AIBaseController;
     friend class AIBaseLapController;
     friend class SkiddingAI;
+    friend class TyreModAI;
+    friend class ExpertAI;
     friend class ArenaAI;
     friend class TestAI;
 

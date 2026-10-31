@@ -680,6 +680,8 @@ public:
      *  speed. */
     virtual float getMaxSteerAngle () const { return getMaxSteerAngle(getSpeed()); }
     // ----------------------------------------------------------------------------------------
+    float getSteerFractionForRadius(float radius, float speed) const;
+    // ----------------------------------------------------------------------------------------
     /** Returns the time till full steering is reached for this kart.
      *  \param steer Current steer value (must be >=0), on which the time till
      *         full steer depends. */

@@ -1193,6 +1193,22 @@ float Kart::getMaxSteerAngle(float speed) const
 }   // getMaxSteerAngle
 
 //-----------------------------------------------------------------------------
+float Kart::getSteerFractionForRadius(float radius, float speed) const
+{
+    InterpolationArray turn_angle_at_speed = m_kart_properties->getTurnRadius();
+    // Convert the turn radius into turn angle
+    // We multiply by wheel base to keep turn radius identical
+    // across karts of different lengths sharing the same
+    // turn radius properties
+    for(int i = 0; i < (int)turn_angle_at_speed.size(); i++)
+        turn_angle_at_speed.setY(i, sinf( 1.0f / turn_angle_at_speed.getY(i))
+                                    * m_kart_properties->getWheelBase());
+
+    float targetSteerAngle = turn_angle_at_speed.get(m_kart_properties->getTurnRadius().getReverse(radius));
+    return targetSteerAngle/getMaxSteerAngle(speed);
+}   // getSteerFractionForRadius
+
+//-----------------------------------------------------------------------------
 /** Sets that this kart has finished the race and finishing time. It also
  *  notifies the race_manager about the race completion for this kart.
  *  \param time The finishing time for this kart. It can either be the

@@ -32,6 +32,7 @@
 #include "tracks/track.hpp"
 #include "utils/hit_processor.hpp"
 #include "mini_glm.hpp"
+#include "config/user_config.hpp"
 
 #include <cstring>
 
@@ -172,7 +173,9 @@ ExplosionAnimation::~ExplosionAnimation()
         m_kart->getBody()->setAngularVelocity(btVector3(0,0,0));
         // Don't reset spectate camera
         auto cl = LobbyProtocol::get<ClientLobby>();
-        if (!GUIEngine::isNoGraphics() && (!cl || !cl->isSpectator()))
+        if (!GUIEngine::isNoGraphics()
+            && (!cl || !cl->isSpectator())
+            && !UserConfigParams::m_ai_tv_mode)
         {
             for (unsigned i = 0; i < Camera::getNumCameras(); i++)
             {

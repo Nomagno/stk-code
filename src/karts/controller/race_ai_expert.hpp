@@ -117,8 +117,9 @@ class ExpertAI : public AIBaseLapController
 {
 private:
     float steerToPoint(const Vec3 &point);
-    void determineTurnRadius(const Vec3 &end, Vec3 *center,
-                                              float *radius) const;
+void determineTurnRadius(const Vec3 &end, const btTransform &start, const Vec3 &tangent, 
+                                           Vec3 *center,
+                                           float *radius) const;
 
     class CrashTypes
     {

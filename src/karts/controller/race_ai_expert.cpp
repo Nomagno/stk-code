@@ -542,15 +542,9 @@ void ExpertAI::handleSteering(float dt)
 
         bool should_skid = false;
         if (computed_fraction > 1.0f) {
-            float skid_factor = m_kart->getKartProperties()->getSkidMax();
-            float skid_min_fraction = m_kart->getKartProperties()->getSkidReduceTurnMin();
-            float skid_max_fraction = m_kart->getKartProperties()->getSkidReduceTurnMax();
-
-            if (computed_fraction > skid_factor*skid_min_fraction
-             && computed_fraction < skid_factor*skid_max_fraction)
-            {
+            const Skidding *skidding = m_kart->getSkidding();
+            if (fabsf(skidding->getSteeringWhenSkidding(computed_fraction)) >= 1.05f){
                 should_skid = true;
-                computed_fraction /= skid_factor;
             }
         }
 
@@ -573,21 +567,22 @@ void ExpertAI::handleSteering(float dt)
  *     to the given tangent.
  *  3. The intersection of these two lines is the center of the circle.
  *  \param[in] end Second point on circle.
+ *  \param[in] end Tangent of circle.
  *  \param[out] center Center point of the circle (local coordinate).
  *  \param[out] radius Radius of the circle.
  */
-void ExpertAI::determineTurnRadius(const Vec3 &end, Vec3 *center,
+void ExpertAI::determineTurnRadius(const Vec3 &end, const btTransform &start, const Vec3 &tangent, 
+                                           Vec3 *center,
                                            float *radius) const
 {
     // Convert end point to local coordinate, so start will be 0, 0, 0
-    Vec3 lc = m_kart->getTrans().inverse()(end);
+    Vec3 lc = start.inverse()(end);
 
     // 1) Line through middle of start+end
     Vec3 mid = 0.5f * lc;
     Vec3 direction = lc;
 
-    Vec3 orthogonal(direction.getZ(), 0, -direction.getX());
-    Vec3 q1 = mid + orthogonal;
+    Vec3 q1 = mid+tangent;
     irr::core::line2df line1(mid.getX(), mid.getZ(),
                              q1.getX(),  q1.getZ()  );
 
@@ -602,6 +597,7 @@ void ExpertAI::determineTurnRadius(const Vec3 &end, Vec3 *center,
     }
     else
     {
+        printf("No intersection???\n");
         // No intersection. In this case assume that the two points are
         // on a semicircle, in which case the center is at 0.5*(start+end):
         if (center)
@@ -3121,21 +3117,26 @@ int ExpertAI::findTurnEnd(unsigned successor, unsigned last_idx, float max_dista
         const DriveNode &next = *dg->getNode(inext);
 
 
-        distance += curr.getDistanceToSuccessor(m_successor_index[i]);
-        angle += fabsf(curr.getAngleToSuccessor(m_successor_index[i]));
+        float c_dist = curr.getDistanceToSuccessor(m_successor_index[i]);
+        float c_angle = fmod(fabsf(curr.getAngleToSuccessor(m_successor_index[i])), PI/4);
+
+        distance += c_dist;
+        angle += c_angle;
+
+        printf("(Dist. %f, Angle %f) ", c_dist, c_angle/(PI/180.0));
 
         if (distance > max_distance)
             break;
         if (angle > max_angle)
             break;
-        if (fabsf(curr.getAngleToSuccessor(m_successor_index[i])) < min_angle_anywhere)
+        if (c_angle < min_angle_anywhere)
             break;
 
         i = dg->getNode(i)->getSuccessor(m_successor_index[i]);
         assert(i == inext);
         inext = dg->getNode(i)->getSuccessor(m_successor_index[i]);
     }
-
+    printf("\n");
     return i;
 }
 
@@ -3156,20 +3157,23 @@ void ExpertAI::handleCurve()
 
     //Vec3 last_xyz = dg->getNode(m_last_direction_node)->getCenter();
 
-    const float max_distance = 40.0;
+    const float max_distance = 300.0;
     const float max_angle = 100.0 * PI / 180.0;
-    const float min_angle_anywhere = 10.0 * PI / 180.0;
+    const float min_angle_anywhere = 5.0 * PI / 180.0;
 
     unsigned end_of_turn = findTurnEnd(m_successor_index[m_track_node], m_last_direction_node,
                         max_distance, max_angle, min_angle_anywhere);
 
-    printf("\tCurrent node: %u\n"
-           "\tEnd of turn: %u\n"
-           "\tEnd of direction: %u\n", m_track_node, end_of_turn, m_last_direction_node);
-    
+
     Vec3 last_xyz = dg->getNode(end_of_turn)->getCenter();
 
-    determineTurnRadius(last_xyz, &m_curve_center, &m_current_curve_radius);
+    determineTurnRadius(last_xyz, m_kart->getTrans(), m_kart->getVelocityLC(), &m_curve_center, &m_current_curve_radius);
+
+    printf("\tCurrent radius: %f\n"
+           "\tCurrent node: %u\n"
+           "\tEnd of turn: %u\n"
+           "\tEnd of direction: %u\n", m_current_curve_radius, m_track_node, end_of_turn, m_last_direction_node);
+
     assert(!std::isnan(m_curve_center.getX()));
     assert(!std::isnan(m_curve_center.getY()));
     assert(!std::isnan(m_curve_center.getZ()));
@@ -3375,6 +3379,7 @@ void ExpertAI::setSteeringFraction(float fraction, bool skid)
         {
             m_controls->setSkidControl(KartControl::SC_NONE);
         } else {
+            fraction = skidding->getSteeringWhenSkidding(fraction);
             m_skid_probability_state = SKID_PROBAB_SKID;
             KartControl::SkidControl sc = fraction > 0
                                           ? KartControl::SC_RIGHT

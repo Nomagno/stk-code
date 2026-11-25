@@ -84,7 +84,7 @@ Currently, TME is a hard fork. It stopped tracking any other STK fork months ago
 - New feature: Purple skids
 - Gradual braking: Basically, now braking will be applied, even with a keyboard, gradually instead of as an on/off deceleration force.
 - Bug fix: This seemingly small issue is actually a huge deal: Item boosts and boostpads do not override each other now. Why: In SuperTuxKart 1.0 you can't use item boosts on tracks that have big, long-lasting ground boostpad sections, or you will override the boost. With the proliferation of track ports from racing simulators such as STK's Italian, open-source older brother TORCS/Speed Dreams. These tracks use boost pads heavily.
-- Karts now do not rescue on top of each other.
+- Karts now do not rescue on top of each other
 
 # For developers
 

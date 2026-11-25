@@ -1098,6 +1098,30 @@ bool KartProperties::getFrictionGameEngineSpeedUncap() const
 }  // getFrictionGameEngineSpeedUncap
 
 // ----------------------------------------------------------------------------
+float KartProperties::getFrictionWallPenaltyTime() const
+{
+    return m_cached_characteristic->getFrictionWallPenaltyTime();
+}  // getFrictionWallPenaltyTime
+
+// ----------------------------------------------------------------------------
+float KartProperties::getFrictionWallPenaltyFadeInTime() const
+{
+    return m_cached_characteristic->getFrictionWallPenaltyFadeInTime();
+}  // getFrictionWallPenaltyFadeInTime
+
+// ----------------------------------------------------------------------------
+float KartProperties::getFrictionWallPenaltySlowdownFraction() const
+{
+    return m_cached_characteristic->getFrictionWallPenaltySlowdownFraction();
+}  // getFrictionWallPenaltySlowdownFraction
+
+// ----------------------------------------------------------------------------
+float KartProperties::getFrictionWallPenaltyEngineMultiplier() const
+{
+    return m_cached_characteristic->getFrictionWallPenaltyEngineMultiplier();
+}  // getFrictionWallPenaltyEngineMultiplier
+
+// ----------------------------------------------------------------------------
 float KartProperties::getBubblegumDuration() const
 {
     return m_cached_characteristic->getBubblegumDuration();

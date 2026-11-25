@@ -460,6 +460,10 @@ public:
     float getFrictionDragCoefficient() const;
     float getFrictionDragExponent() const;
     bool getFrictionGameEngineSpeedUncap() const;
+    float getFrictionWallPenaltyTime() const;
+    float getFrictionWallPenaltyFadeInTime() const;
+    float getFrictionWallPenaltySlowdownFraction() const;
+    float getFrictionWallPenaltyEngineMultiplier() const;
 
     float getBubblegumDuration() const;
     float getBubblegumSpeedFraction() const;

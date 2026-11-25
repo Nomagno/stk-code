@@ -2977,6 +2977,9 @@ void Kart::crashed(const Material *m, const Vec3 &normal)
         if (m_crash_cooldown_ticks <= 0) {
             m_crash_cooldown_ticks = stk_config->time2Ticks(2);
             m_tyres->applyCrashPenalty();
+
+            m_kart_properties->getTerrainImpulseType();
+            setSlowdown(MaxSpeed::MS_DECREASE_WALL, getKartProperties()->getFrictionWallPenaltySlowdownFraction(), stk_config->time2Ticks(getKartProperties()->getFrictionWallPenaltyFadeInTime()), stk_config->time2Ticks(getKartProperties()->getFrictionWallPenaltyTime()));
         }
     }
 #ifdef DEBUG
@@ -3866,6 +3869,10 @@ void Kart::updateEnginePowerAndBrakes(int ticks)
     // An engine power of 0 keeps the kart speed constant
     // after correcting for the linear slowdown.
     engine_power = compensateLinearSlowdown(engine_power);
+
+    if (m_max_speed->isSpeedDecreaseActive(MaxSpeed::MS_DECREASE_WALL)) {
+        engine_power *= getKartProperties()->getFrictionWallPenaltyEngineMultiplier();
+    }
 
     applyEngineForce(engine_power);
 }   // updateEnginePowerAndBrakes

@@ -160,6 +160,10 @@ public:
         FRICTION_DRAG_COEFFICIENT,
         FRICTION_DRAG_EXPONENT,
         FRICTION_GAME_ENGINE_SPEED_UNCAP,
+        FRICTION_WALL_PENALTY_TIME,
+        FRICTION_WALL_PENALTY_FADE_IN_TIME,
+        FRICTION_WALL_PENALTY_SLOWDOWN_FRACTION,
+        FRICTION_WALL_PENALTY_ENGINE_MULTIPLIER,
 
         // Bubblegum
         BUBBLEGUM_DURATION,
@@ -434,6 +438,10 @@ public:
     float getFrictionDragCoefficient() const;
     float getFrictionDragExponent() const;
     bool getFrictionGameEngineSpeedUncap() const;
+    float getFrictionWallPenaltyTime() const;
+    float getFrictionWallPenaltyFadeInTime() const;
+    float getFrictionWallPenaltySlowdownFraction() const;
+    float getFrictionWallPenaltyEngineMultiplier() const;
 
     float getBubblegumDuration() const;
     float getBubblegumSpeedFraction() const;

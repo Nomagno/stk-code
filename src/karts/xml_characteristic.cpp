@@ -501,6 +501,14 @@ void XmlCharacteristic::load(const XMLNode *node)
             &m_values[FRICTION_DRAG_EXPONENT]);
         sub_node->get("game-engine-speed-uncap",
             &m_values[FRICTION_GAME_ENGINE_SPEED_UNCAP]);
+        sub_node->get("wall-penalty-time",
+            &m_values[FRICTION_WALL_PENALTY_TIME]);
+        sub_node->get("wall-penalty-fade-in-time",
+            &m_values[FRICTION_WALL_PENALTY_FADE_IN_TIME]);
+        sub_node->get("wall-penalty-slowdown-fraction",
+            &m_values[FRICTION_WALL_PENALTY_SLOWDOWN_FRACTION]);
+        sub_node->get("wall-penalty-engine-multiplier",
+            &m_values[FRICTION_WALL_PENALTY_ENGINE_MULTIPLIER]);
     }
 
     if (const XMLNode *sub_node = node->getNode("bubblegum"))

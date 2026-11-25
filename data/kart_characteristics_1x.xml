@@ -299,7 +299,9 @@
             true_engine_force = engine_force - drag_coefficient * current_speed^drag_exponent
             -->
         <!-- game-engine-speed-uncap: if true, the kart will have no max speed from boosts (it'll still have limited max speed from slowdowns) -->
-        <friction kart-friction="0.0" slowdown-factor="1.0" drag-coefficient="5.0" drag-exponent="1.5" game-engine-speed-uncap="false"/>
+        <friction kart-friction="0.0" slowdown-factor="1.0" drag-coefficient="5.0" drag-exponent="1.5" game-engine-speed-uncap="false"
+         wall-penalty-time="0.0" wall-penalty-slowdown-fraction="1.0" wall-penalty-engine-multiplier="1.0" wall-penalty-fade-in-time="0.2"
+        />
 
         <!-- ********** Visuals ********** -->
 
@@ -679,7 +681,9 @@
                  engine-force="*0.01 *0.01"
             />
             <lean max="11.0" speed="14.0" />
-            <friction kart-friction="0.0" slowdown-factor="2.6" drag-coefficient="4.0" drag-exponent="1.45" game-engine-speed-uncap="false"/>
+            <friction kart-friction="0.0" slowdown-factor="2.6" drag-coefficient="4.0" drag-exponent="1.45" game-engine-speed-uncap="false"
+                     wall-penalty-time="2.0" wall-penalty-slowdown-fraction="0.8" wall-penalty-engine-multiplier="0.4"
+            />
             <trackzipperfactor value="0.0" />
             <explosion duration="*0.6" radius="*0.6" />
             <nitro

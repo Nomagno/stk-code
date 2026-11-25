@@ -169,6 +169,14 @@ AbstractCharacteristic::ValueType AbstractCharacteristic::getType(
         return TYPE_FLOAT;
     case FRICTION_GAME_ENGINE_SPEED_UNCAP:
         return TYPE_BOOL;
+    case FRICTION_WALL_PENALTY_TIME:
+        return TYPE_FLOAT;
+    case FRICTION_WALL_PENALTY_FADE_IN_TIME:
+        return TYPE_FLOAT;
+    case FRICTION_WALL_PENALTY_SLOWDOWN_FRACTION:
+        return TYPE_FLOAT;
+    case FRICTION_WALL_PENALTY_ENGINE_MULTIPLIER:
+        return TYPE_FLOAT;
     case BUBBLEGUM_DURATION:
         return TYPE_FLOAT;
     case BUBBLEGUM_SPEED_FRACTION:
@@ -579,6 +587,14 @@ std::string AbstractCharacteristic::getName(CharacteristicType type)
         return "FRICTION_DRAG_EXPONENT";
     case FRICTION_GAME_ENGINE_SPEED_UNCAP:
         return "FRICTION_GAME_ENGINE_SPEED_UNCAP";
+    case FRICTION_WALL_PENALTY_TIME:
+        return "FRICTION_WALL_PENALTY_TIME";
+    case FRICTION_WALL_PENALTY_FADE_IN_TIME:
+        return "FRICTION_WALL_PENALTY_FADE_IN_TIME";
+    case FRICTION_WALL_PENALTY_SLOWDOWN_FRACTION:
+        return "FRICTION_WALL_PENALTY_SLOWDOWN_FRACTION";
+    case FRICTION_WALL_PENALTY_ENGINE_MULTIPLIER:
+        return "FRICTION_WALL_PENALTY_ENGINE_MULTIPLIER";
     case BUBBLEGUM_DURATION:
         return "BUBBLEGUM_DURATION";
     case BUBBLEGUM_SPEED_FRACTION:
@@ -1550,6 +1566,54 @@ bool AbstractCharacteristic::getFrictionGameEngineSpeedUncap() const
                     getName(FRICTION_GAME_ENGINE_SPEED_UNCAP).c_str());
     return result;
 }  // getFrictionGameEngineSpeedUncap
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getFrictionWallPenaltyTime() const
+{
+    float result;
+    bool is_set = false;
+    process(FRICTION_WALL_PENALTY_TIME, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FRICTION_WALL_PENALTY_TIME).c_str());
+    return result;
+}  // getFrictionWallPenaltyTime
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getFrictionWallPenaltyFadeInTime() const
+{
+    float result;
+    bool is_set = false;
+    process(FRICTION_WALL_PENALTY_FADE_IN_TIME, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FRICTION_WALL_PENALTY_FADE_IN_TIME).c_str());
+    return result;
+}  // getFrictionWallPenaltyFadeInTime
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getFrictionWallPenaltySlowdownFraction() const
+{
+    float result;
+    bool is_set = false;
+    process(FRICTION_WALL_PENALTY_SLOWDOWN_FRACTION, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FRICTION_WALL_PENALTY_SLOWDOWN_FRACTION).c_str());
+    return result;
+}  // getFrictionWallPenaltySlowdownFraction
+
+// ----------------------------------------------------------------------------
+float AbstractCharacteristic::getFrictionWallPenaltyEngineMultiplier() const
+{
+    float result;
+    bool is_set = false;
+    process(FRICTION_WALL_PENALTY_ENGINE_MULTIPLIER, &result, &is_set);
+    if (!is_set)
+        Log::fatal("AbstractCharacteristic", "Can't get characteristic %s",
+                    getName(FRICTION_WALL_PENALTY_ENGINE_MULTIPLIER).c_str());
+    return result;
+}  // getFrictionWallPenaltyEngineMultiplier
 
 // ----------------------------------------------------------------------------
 float AbstractCharacteristic::getBubblegumDuration() const

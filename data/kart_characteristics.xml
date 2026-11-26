@@ -686,7 +686,7 @@
                  engine-force="*0.01 *0.01"
             />
             <friction kart-friction="0.0" slowdown-factor="2.6" drag-coefficient="4.0" drag-exponent="1.45" game-engine-speed-uncap="false"
-                     wall-penalty-time="2.0" wall-penalty-slowdown-fraction="0.8" wall-penalty-engine-multiplier="0.4"
+                     wall-penalty-time="1.5" wall-penalty-slowdown-fraction="0.8" wall-penalty-engine-multiplier="0.4"
             />
             <trackzipperfactor value="0.0" />
             <explosion duration="*0.6" radius="*0.6" />
